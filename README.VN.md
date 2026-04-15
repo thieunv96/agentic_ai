@@ -42,6 +42,74 @@ ai_team/  →  triển khai vào  →  .github/
 
 ---
 
+## Sơ Đồ Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                  FRAMEWORK ML/AI CÁ NHÂN — QUY TRÌNH               │
+└─────────────────────────────────────────────────────────────────────┘
+
+  /my-new-version
+      Hỏi các câu setup (mỗi câu có giải thích TẠI SAO)
+      Hỏi: "Có gì cần bổ sung không?"
+      Tạo: PROJECT.md, STATE.md
+      ✗ Không commit
+
+  /my-provide-context [--papers] [--refs] [--idea]
+      Nạp: papers / code refs / ý tưởng → KNOWLEDGE.md
+      Hỏi: "Có gì muốn thêm trước khi tạo roadmap không?"
+      Hỏi: "Có chạy research không?" ──────────────────────[Tùy chọn]
+              ├─ Quick research  (gợi ý: chủ đề quen/rõ ràng)
+              ├─ Deep research   (gợi ý: phức tạp/chưa chắc)
+              └─ Skip            (gợi ý: context đã đủ rõ)
+      Tạo: ROADMAP.md
+      ✅ COMMIT #1 ── "docs: setup context"
+
+  ╔══════════════════════════════════════════╗
+  ║         VÒNG LẶP PHASE (lặp N lần)      ║
+  ╚══════════════════════════════════════════╝
+
+  /my-discuss N
+      Trình bày các lĩnh vực quyết định (kèm bối cảnh + trade-offs)
+      Thảo luận từng lĩnh vực (giải thích TẠI SAO trước mỗi câu hỏi)
+      Hỏi: "Có gì cần thêm trước khi chốt context không?"
+      Tạo: N-CONTEXT.md, N-DISCUSSION-LOG.md
+      ✗ Không commit
+
+  /my-plan N
+      Hỏi: "Có chạy research cho phase này không?" ─────────[Tùy chọn]
+              ├─ Quick / Deep / Skip
+      Spawn my-planner → PLAN.md
+      Xác minh với my-plan-checker
+      Hỏi: "Có gì cần điều chỉnh trước khi chốt không?"
+      ✅ COMMIT #2 ── "docs: plan phase N"
+
+  /my-implement N
+      Spawn my-executor agents (song song theo wave)
+      Executor viết code vào disk  ✗ không commit từng task
+      Tất cả waves xong → SUMMARY.md
+      ✅ COMMIT #3 ── "feat/train/data(phase-N): implement ..."
+
+  /my-evaluate N
+      Kiểm tra metrics so với mục tiêu trong CONTEXT.md
+      Tạo: EVALUATION.md với quyết định go/no-go
+      ✗ Không commit
+      │
+      ├─ ✅ Go  → phase tiếp theo (/my-discuss N+1)
+      └─ ❌ No-go → /my-debug hoặc lặp lại
+
+  └──────── lặp cho đến khi hết phases ───────────────────┘
+
+  /my-release-version vX.X.X
+      Tạo: VERSION-SUMMARY.md + git tag
+      ✅ COMMIT ── "chore: release vX.X.X"
+```
+
+> **Kỷ luật commit:** Chỉ có 3 điểm commit cho mỗi phase (roadmap / plan / implementation).
+> Không commit trong: discuss, evaluate, research, debug, hoặc status session.
+
+---
+
 ## Toàn Bộ 15 Lệnh
 
 ### Quản Lý Version
@@ -49,7 +117,7 @@ ai_team/  →  triển khai vào  →  .github/
 | Lệnh | Mô tả |
 |------|-------|
 | `/my-new-version` | Bắt đầu version hoặc milestone mới. Tạo cấu trúc `.planning/`, PROJECT.md, STATE.md, ROADMAP.md. |
-| `/my-provide-context [--papers] [--refs] [--idea] [--update]` | Nạp tài liệu ML (papers, code refs, ý tưởng) → KNOWLEDGE.md + ROADMAP.md ban đầu. Tự động chạy research. |
+| `/my-provide-context [--papers] [--refs] [--idea] [--update]` | Nạp tài liệu ML (papers, code refs, ý tưởng) → KNOWLEDGE.md + ROADMAP.md ban đầu. Hỏi người dùng trước khi chạy research. |
 | `/my-release-version <v>` | Đóng version với VERSION-SUMMARY.md, git tag và lưu trữ planning artifacts. |
 
 ### Vòng Lặp Phase

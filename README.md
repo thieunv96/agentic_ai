@@ -42,6 +42,74 @@ ai_team/  →  deploy to  →  .github/
 
 ---
 
+## Workflow Visualization
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    MY ML/AI FRAMEWORK WORKFLOW                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+  /my-new-version
+      Ask setup questions (each with WHY explanation)
+      Ask: "Anything else to add?"
+      Creates: PROJECT.md, STATE.md
+      ✗ No commit
+
+  /my-provide-context [--papers] [--refs] [--idea]
+      Ingest: papers / code refs / ideas → KNOWLEDGE.md
+      Ask: "Anything else to add before roadmap?"
+      Ask: "Run research?" ──────────────────────────────────[Optional]
+              ├─ Quick research  (recommended: topic well-known)
+              ├─ Deep research   (recommended: complex/uncertain)
+              └─ Skip            (recommended: context already clear)
+      Creates: ROADMAP.md
+      ✅ COMMIT #1 ── "docs: setup context"
+
+  ╔══════════════════════════════════════╗
+  ║         PHASE LOOP (repeat N)        ║
+  ╚══════════════════════════════════════╝
+
+  /my-discuss N
+      Present decision areas (with background + trade-offs)
+      Discuss each area (explain WHY before each question)
+      Ask: "Anything else before locking context?"
+      Creates: N-CONTEXT.md, N-DISCUSSION-LOG.md
+      ✗ No commit
+
+  /my-plan N
+      Ask: "Run research for this phase?" ──────────────────[Optional]
+              ├─ Quick / Deep / Skip
+      Spawn my-planner → PLAN.md
+      Verify with my-plan-checker
+      Ask: "Anything to adjust before finalizing?"
+      ✅ COMMIT #2 ── "docs: plan phase N"
+
+  /my-implement N
+      Spawn my-executor agents (wave-based parallel)
+      Executors write code to disk  ✗ no per-task commits
+      All waves complete → SUMMARY.md
+      ✅ COMMIT #3 ── "feat/train/data(phase-N): implement ..."
+
+  /my-evaluate N
+      Check metrics vs CONTEXT.md targets
+      Produces: EVALUATION.md with go/no-go
+      ✗ No commit
+      │
+      ├─ ✅ Go  → next phase (/my-discuss N+1)
+      └─ ❌ No-go → /my-debug or iterate
+
+  └──────── repeat until all phases done ──────────────────┘
+
+  /my-release-version vX.X.X
+      Creates: VERSION-SUMMARY.md + git tag
+      ✅ COMMIT ── "chore: release vX.X.X"
+```
+
+> **Commit discipline:** Only 3 commit points per phase (roadmap / plan / implementation).
+> No commits during discuss, evaluate, research, debug, or status sessions.
+
+---
+
 ## All 15 Commands
 
 ### Version Management
@@ -49,7 +117,7 @@ ai_team/  →  deploy to  →  .github/
 | Command | Description |
 |---------|-------------|
 | `/my-new-version` | Start a new version or milestone. Creates `.planning/` structure, PROJECT.md, STATE.md, ROADMAP.md skeleton. |
-| `/my-provide-context [--papers] [--refs] [--idea] [--update]` | Ingest ML materials (papers, code refs, ideas) → KNOWLEDGE.md + initial ROADMAP.md. Auto-runs research. |
+| `/my-provide-context [--papers] [--refs] [--idea] [--update]` | Ingest ML materials (papers, code refs, ideas) → KNOWLEDGE.md + initial ROADMAP.md. Asks user before running research (quick/deep/skip). |
 | `/my-release-version <v>` | Close version with VERSION-SUMMARY.md, git tag, and archived planning artifacts. |
 
 ### Phase Loop

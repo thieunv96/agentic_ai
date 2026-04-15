@@ -14,12 +14,33 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
 Parse from $ARGUMENTS:
-- Mode: `--quick` (default) or `--deep`
+- Mode: `--quick`, `--deep`, or unspecified
 - Topic: remaining text
 
 Read: STATE.md, PROJECT.md, KNOWLEDGE.md (if exists — to avoid re-researching known material).
 
 Create topic slug: lowercase, hyphens (e.g., "LoRA for vision encoders" → `lora-vision-encoders`).
+
+## 1b. Confirm Mode with User
+
+If mode is **not** specified in $ARGUMENTS, assess the topic complexity and ask the user:
+
+> "I'll research: **{topic}**
+>
+> [Recommendation: **{Quick|Deep}** — {brief reason based on topic complexity, e.g., "topic is well-defined and specific" / "topic is broad or frontier — a deep survey would find more nuanced options"}]
+>
+> Options:
+> - **Quick** (~10 min): 3-5 key papers, top findings, one recommendation
+> - **Deep** (~30 min): full literature survey, approach comparison, gap analysis, synthesis
+>
+> Which mode would you prefer?"
+
+If mode **is** specified in $ARGUMENTS, proceed directly without asking.
+
+Recommendation guidelines:
+- Recommend **Quick** when: topic is well-known, specific technique, user seems confident
+- Recommend **Deep** when: topic is broad, frontier/novel, or involves architectural trade-offs
+- Do NOT recommend research at all if KNOWLEDGE.md already contains thorough coverage of the topic
 
 ## 2. Spawn my-researcher
 

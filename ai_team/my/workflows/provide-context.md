@@ -63,24 +63,40 @@ Create `.planning/KNOWLEDGE.md`:
 [3-7 cross-cutting insights that should inform all phases]
 ```
 
-## 4. Quick Research (via my-researcher)
+## 4. Ask to Add More Context
 
-Spawn my-researcher with:
-```
-<files_to_read>
-.planning/PROJECT.md
-.planning/KNOWLEDGE.md
-</files_to_read>
+After processing all inputs, ask the user:
 
-Task: Generate RESEARCH-OVERVIEW.md — a high-level research summary covering:
-1. Recommended overall approach based on provided papers/refs
-2. Identified technical challenges
-3. Suggested phase breakdown (data prep / architecture / training / evaluation)
-4. Key libraries and tools needed
-5. Estimated effort per phase
-```
+> "I've finished processing your context. Is there anything else you'd like to add before I create the roadmap?
+> For example: additional papers, code references, known constraints, design decisions, or challenges to be aware of."
 
-## 5. Create ROADMAP.md
+Wait for response. If the user provides more, process it and update KNOWLEDGE.md. Repeat if needed until user confirms they're done.
+
+## 5. Optional Research
+
+Assess the KNOWLEDGE.md created so far:
+- If knowledge gaps are apparent or the approach is uncertain → recommend research
+- If papers/refs already cover the approach clearly → recommend skip
+
+Ask the user:
+
+> "Should I run research before creating the roadmap?
+> 
+> [Recommendation: {Quick|Deep|Skip} — because {brief reason}]
+>
+> Options:
+> - **Quick research** (~10 min): scan 3-5 key papers, get a fast recommendation
+> - **Deep research** (~30 min): full literature survey, approach comparison, gap analysis
+> - **Skip research**: proceed directly to roadmap (good if context already covers the approach)
+>
+> Which would you prefer?"
+
+If user chooses Quick or Deep: spawn my-researcher accordingly (see research.md for task format).
+If user chooses Skip: proceed to next step.
+
+Only recommend research when there is genuine uncertainty. If KNOWLEDGE.md already contains sufficient papers and a clear approach, recommend Skip.
+
+## 6. Create ROADMAP.md
 
 Based on research, create `.planning/ROADMAP.md`:
 ```markdown
@@ -104,19 +120,19 @@ Based on research, create `.planning/ROADMAP.md`:
 
 (Adapt phases based on the actual ML task from PROJECT.md)
 
-## 6. Update STATE.md
+## 7. Update STATE.md
 
 Update STATE.md:
 - Status: "Ready to discuss — run /my-discuss 1"
 - Add pointer to KNOWLEDGE.md and ROADMAP.md
 
-## 7. Commit
+## 8. Commit
 
 ```bash
 node ".github/my/bin/my-tools.cjs" commit "docs: setup context for [version-name]" --files .planning/KNOWLEDGE.md .planning/ROADMAP.md .planning/STATE.md
 ```
 
-## 8. Show Next Step
+## 9. Show Next Step
 
 ```
 ---

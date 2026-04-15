@@ -40,16 +40,22 @@ For each wave, spawn my-executor subagents in parallel:
 
 Each executor:
 1. Reads context files
-2. Executes tasks with atomic commits (one commit per task)
+2. Executes tasks — writes code to disk, does NOT commit
 3. Creates SUMMARY.md
-4. Uses `--no-verify` on commits (parallel execution)
 
-## 4. Collect Results
+## 4. Collect Results and Commit
 
 After all waves complete:
 - Check SUMMARY.md for each plan
 - Update STATE.md with completion status
-- Create metadata commit
+
+Commit everything as a single phase commit:
+
+```bash
+node ".github/my/bin/my-tools.cjs" commit "[type](phase-[N]): implement [phase-name]" --files .
+```
+
+Use the appropriate type prefix: `feat`, `train`, `data`, `model`, `eval` based on phase type.
 
 ## 5. Show Next Step
 

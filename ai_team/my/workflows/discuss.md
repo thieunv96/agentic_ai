@@ -1,5 +1,5 @@
 <purpose>
-Discuss and lock implementation decisions for a phase. Creates {N}-CONTEXT.md (for planner/executor) and {N}-DISCUSSION-LOG.md (audit trail). Always commits both.
+Discuss and lock implementation decisions for a phase. Creates {N}-CONTEXT.md (for planner/executor) and {N}-DISCUSSION-LOG.md (audit trail).
 </purpose>
 
 <process>
@@ -49,14 +49,34 @@ For ML/CV/VLM phases, typical areas by phase type:
 
 ## 3. Discuss Each Area
 
-For each area:
-1. Present the area and options (unless --auto)
-2. Capture decision
-3. Note rationale
+For each area, present it in this format (unless --auto):
 
-Skip areas already decided in prior CONTEXT.md files.
+```
+**[Area Name]**
+*Why this matters:* [1 sentence explaining impact on the project]
 
-## 4. Create {N}-CONTEXT.md
+Options:
+- **Option A** — [what it is] | Trade-off: [pros / cons]
+- **Option B** — [what it is] | Trade-off: [pros / cons]
+- **Option C** — [what it is] | Trade-off: [pros / cons]
+
+Recommendation: **[Option X]** because [brief reason based on project context]
+
+Your choice?
+```
+
+Capture the decision and rationale. Skip areas already decided in prior CONTEXT.md files.
+
+## 4. Ask for More
+
+After covering all standard areas, ask:
+
+> "I've covered all the standard decision areas for Phase [N]. Is there anything else you'd like to discuss or decide before I lock the context?
+> For example: edge cases, specific constraints, implementation risks, or preferences not yet covered."
+
+Incorporate any additional decisions into the context.
+
+## 5. Create {N}-CONTEXT.md
 
 ```markdown
 # Phase [N] Context: [Phase Name]
@@ -81,19 +101,13 @@ Skip areas already decided in prior CONTEXT.md files.
 [Specific metric targets]
 ```
 
-## 5. Create {N}-DISCUSSION-LOG.md
+## 6. Create {N}-DISCUSSION-LOG.md
 
 Following the discussion-log template, record:
 - All options considered for each area
 - User's final choice
 - Any free-form notes
 Mark clearly: "Audit trail only — do not use as input to planning agents"
-
-## 6. Commit Both
-
-```bash
-node ".github/my/bin/my-tools.cjs" commit "docs: discuss phase [N] - [phase-name]" --files .planning/phases/[phase-dir]/[N]-CONTEXT.md .planning/phases/[phase-dir]/[N]-DISCUSSION-LOG.md .planning/STATE.md
-```
 
 ## 7. Show Next Step
 

@@ -17,14 +17,44 @@ If `project_exists` is true: Error — version already initialized. Use my-statu
 
 ## 2. Ask ML Setup Questions
 
-Ask the user (one at a time):
-1. **Version name**: What is this version called? (e.g., "v1.0", "baseline-vlm", "efficientdet-v2")
-2. **Task type**: What ML task? (Image Classification / Object Detection / Semantic Segmentation / VLM / Image Generation / Video Understanding / Other)
-3. **Model goal**: What model are you building or improving? (new from scratch / fine-tuning existing / architecture research)
-4. **Dataset**: What dataset(s) will you use? (Name + approximate size)
-5. **Target metrics**: What metrics define success? (e.g., "mAP > 0.45 on COCO val", "VQA Accuracy > 75%")
-6. **Baseline**: Is there a baseline to beat? (prior work / previous version / paper result)
-7. **Compute**: GPU resources available? (single GPU / multi-GPU / TPU / cloud)
+Ask the user one at a time. For each question, include a brief explanation of why it's needed:
+
+1. **Version name**
+   > *Why:* Used to label all planning files, git tags, and reports for this development cycle.
+   > What is this version called? (e.g., "v1.0", "baseline-vlm", "efficientdet-v2")
+
+2. **Task type**
+   > *Why:* Determines which phase templates, evaluation metrics, and agent prompts are most relevant.
+   > What ML task are you working on? (Image Classification / Object Detection / Semantic Segmentation / VLM / Image Generation / Video Understanding / Other)
+
+3. **Model goal**
+   > *Why:* Shapes the phase breakdown — "new from scratch" needs architecture + training phases; "fine-tuning" can skip some early phases.
+   > What is your model goal? (building new from scratch / fine-tuning an existing model / architecture research)
+
+4. **Dataset**
+   > *Why:* Affects data pipeline phase complexity and augmentation strategy decisions.
+   > What dataset(s) will you use? (Name + approximate size, e.g., "COCO 2017, ~120k images")
+
+5. **Target metrics**
+   > *Why:* These become the go/no-go criteria in every evaluation phase.
+   > What metrics define success? (e.g., "mAP > 0.45 on COCO val", "VQA Accuracy > 75%")
+
+6. **Baseline**
+   > *Why:* Gives the evaluator a reference point. Without a baseline, it's hard to judge if results are good.
+   > Is there a baseline to beat? (prior work / previous version / paper result — or "none")
+
+7. **Compute**
+   > *Why:* Affects batch size recommendations, training time estimates, and whether distributed training is needed.
+   > What GPU resources are available? (single GPU / multi-GPU / TPU / cloud — include VRAM if known)
+
+## 2b. Ask for More
+
+After all 7 questions, ask:
+
+> "I have all the core setup information. Is there anything else you'd like to include in the project setup?
+> For example: additional constraints, out-of-scope items, known risks, team preferences, or relevant prior work to be aware of."
+
+Incorporate any additional information into PROJECT.md under an "Additional Notes" section.
 
 ## 3. Create Planning Structure
 
