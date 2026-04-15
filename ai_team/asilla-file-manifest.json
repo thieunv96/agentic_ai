@@ -1,8 +1,0 @@
-{
-  "_note": "ML/AI Edition - optimized for Computer Vision and VLM development",
-  "_usage": "Generate with: find .github/asilla -type f | sort | xargs sha256sum | awk '{print $2, $1}' | sed 's|.github/||'",
-  "version": "2.0.0-ml",
-  "timestamp": "2026-03-25T08:45:11.445Z",
-  "repo": "__REPO_URL_PLACEHOLDER__",
-  "files": {}
-}
