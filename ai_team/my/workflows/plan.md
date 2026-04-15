@@ -12,7 +12,7 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
 Parse: `phase_dir`, `phase_number`, `phase_name`, `commit_docs`.
-Read: STATE.md, ROADMAP.md, {N}-CONTEXT.md, KNOWLEDGE.md.
+Read: STATE.md, ROADMAP.md, REQUIREMENTS.md, {N}-CONTEXT.md, KNOWLEDGE.md.
 
 Check flags:
 - `--gaps`: gap closure mode (read EVALUATION.md for failed criteria)
@@ -58,6 +58,7 @@ Spawn my-planner:
 ```
 <files_to_read>
 .planning/PROJECT.md
+.planning/REQUIREMENTS.md
 .planning/phases/[phase-dir]/[N]-CONTEXT.md
 .planning/phases/[phase-dir]/RESEARCH.md
 .planning/KNOWLEDGE.md

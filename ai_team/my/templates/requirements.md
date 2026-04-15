@@ -1,45 +1,61 @@
 # Requirements Template
 
-Template for `.planning/REQUIREMENTS.md` — checkable requirements that define "done."
+Template for `.planning/REQUIREMENTS.md` — formal ML/AI project requirements with IDs for traceability.
 
 <template>
 
 ```markdown
-# Requirements: [Project Name]
+# Requirements: [Project Name] — [Version]
 
 **Defined:** [date]
-**Core Value:** [from PROJECT.md]
+**Task:** [ML task type]
+**Core Value:** [from PROJECT.md — what success looks like]
 
 ## v1 Requirements
 
-Requirements for initial release. Each maps to roadmap phases.
+Requirements for this version. Each maps to exactly one roadmap phase.
 
-### Authentication
+### Data (DATA)
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session persists across browser refresh
+- [ ] **DATA-01**: [Dataset is loaded and split into train/val/test with reproducible splits]
+- [ ] **DATA-02**: [Preprocessing pipeline handles [specific transforms] without information leakage]
+- [ ] **DATA-03**: [DataLoader achieves [N] samples/sec throughput on [hardware]]
 
-### [Category 2]
+### Model (MODEL)
+
+- [ ] **MODEL-01**: [Model accepts [input shape] and produces [output shape] correctly]
+- [ ] **MODEL-02**: [Model architecture implements [specific component] as defined in PROJECT.md]
+- [ ] **MODEL-03**: [Model parameter count is within [target] for [deployment constraint]]
+
+### Training (TRAIN)
+
+- [ ] **TRAIN-01**: [Training loop converges — loss decreasing monotonically after warmup]
+- [ ] **TRAIN-02**: [Validation metrics computed after every epoch with early stopping]
+- [ ] **TRAIN-03**: [Checkpoint saving/loading works — training can be resumed]
+
+### Evaluation (EVAL)
+
+- [ ] **EVAL-01**: [[Primary metric] > [target value] on [benchmark] test set]
+- [ ] **EVAL-02**: [Evaluation runs in < [N] seconds per image/batch]
+- [ ] **EVAL-03**: [Qualitative results visualized for [N] representative samples]
+
+### Infrastructure (INFRA)
+
+- [ ] **INFRA-01**: [Training runs on [hardware spec] without OOM errors]
+- [ ] **INFRA-02**: [Experiment tracking logs metrics, hyperparameters, and artifacts]
+
+### [Additional Category]
 
 - [ ] **[CAT]-01**: [Requirement description]
-- [ ] **[CAT]-02**: [Requirement description]
-- [ ] **[CAT]-03**: [Requirement description]
 
-### [Category 3]
+## Future Requirements
 
-- [ ] **[CAT]-01**: [Requirement description]
-- [ ] **[CAT]-02**: [Requirement description]
-
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
+Acknowledged but deferred to later versions. Not in current roadmap.
 
 ### [Category]
 
-- **[CAT]-01**: [Requirement description]
-- **[CAT]-02**: [Requirement description]
+- **[CAT]-01**: [Requirement description — why deferred]
+- **[CAT]-02**: [Requirement description — why deferred]
 
 ## Out of Scope
 
@@ -47,20 +63,20 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| [Feature] | [Why excluded] |
-| [Feature] | [Why excluded] |
+| [Feature] | [Why excluded — e.g., "Out of compute budget for v1"] |
+| [Feature] | [Why excluded — e.g., "Requires labeled data not yet available"] |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Each v1 requirement maps to exactly one phase. Updated during roadmap creation.
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| [REQ-ID] | Phase [N] | Pending |
+| Requirement ID | Description | Phase | Status |
+|----------------|-------------|-------|--------|
+| DATA-01 | [brief description] | Phase 1 | Pending |
+| DATA-02 | [brief description] | Phase 1 | Pending |
+| MODEL-01 | [brief description] | Phase 2 | Pending |
+| TRAIN-01 | [brief description] | Phase 3 | Pending |
+| EVAL-01 | [brief description] | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: [X] total
@@ -69,7 +85,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: [date]*
-*Last updated: [date] after [trigger]*
+*Last updated: [date] — [trigger: e.g., "after Phase 2 complete"]*
 ```
 
 </template>
@@ -77,155 +93,146 @@ Which phases cover which requirements. Updated during roadmap creation.
 <guidelines>
 
 **Requirement Format:**
-- ID: `[CATEGORY]-[NUMBER]` (AUTH-01, CONTENT-02, SOCIAL-03)
-- Description: User-centric, testable, atomic
-- Checkbox: Only for v1 requirements (v2 are not yet actionable)
+- ID: `[CATEGORY]-[NUMBER]` (DATA-01, MODEL-02, TRAIN-03, EVAL-01, INFRA-01)
+- Description: Task/system-centric, testable, atomic — what the model/system does, not how
+- Checkbox: Only for v1 requirements (future are not yet actionable)
 
-**Categories:**
-- Derive from research FEATURES.md categories
-- Keep consistent with domain conventions
-- Typical: Authentication, Content, Social, Notifications, Moderation, Payments, Admin
+**ML Requirement Categories:**
+- **DATA**: Dataset loading, preprocessing, augmentation, splits, dataloader performance
+- **MODEL**: Architecture, input/output shapes, components, parameter constraints
+- **TRAIN**: Training loop, convergence, checkpointing, hyperparameters, logging
+- **EVAL**: Metrics on benchmarks, speed, qualitative results, comparison to baseline
+- **INFRA**: Hardware utilization, experiment tracking, deployment, reproducibility
+- Add domain-specific categories as needed (e.g., **VLM**, **DET**, **SEG**)
 
-**v1 vs v2:**
+**v1 vs Future:**
 - v1: Committed scope, will be in roadmap phases
-- v2: Acknowledged but deferred, not in current roadmap
-- Moving v2 → v1 requires roadmap update
+- Future: Acknowledged but deferred — important for roadmap but not now
+- Moving Future → v1 requires roadmap update
 
 **Out of Scope:**
-- Explicit exclusions with reasoning
-- Prevents "why didn't you include X?" later
-- Anti-features from research belong here with warnings
+- Explicit exclusions with reasoning (prevents "why didn't you include X?")
+- Common ML anti-features: perfect accuracy, real-time on CPU without quantization, etc.
 
 **Traceability:**
-- Empty initially, populated during roadmap creation
-- Each requirement maps to exactly one phase
-- Unmapped requirements = roadmap gap
+- Empty initially, populated during roadmap creation in `/my-new-version`
+- Each requirement maps to **exactly one** phase
+- Unmapped requirements = roadmap gap (must fix before proceeding)
+- Update status as phases complete: Pending → In Progress → Complete
 
-**Status Values:**
-- Pending: Not started
-- In Progress: Phase is active
-- Complete: Requirement verified
-- Blocked: Waiting on external factor
+**Requirement quality checklist:**
+- Specific: includes concrete targets (numbers, benchmarks, hardware)
+- Testable: can be verified by running code or checking output
+- Atomic: one thing per requirement (not "model trains AND evaluates")
+- Task-centric: describes what the model/system achieves, not implementation details
 
 </guidelines>
 
 <evolution>
 
 **After each phase completes:**
-1. Mark covered requirements as Complete
-2. Update traceability status
-3. Note any requirements that changed scope
+1. Mark covered requirements as Complete (update checkbox + traceability status)
+2. Note any requirements that changed scope (with date + reason)
 
 **After roadmap updates:**
-1. Verify all v1 requirements still mapped
-2. Add new requirements if scope expanded
-3. Move requirements to v2/out of scope if descoped
+1. Verify all v1 requirements still mapped to a phase
+2. Add new requirements if scope expanded (with new IDs)
+3. Move requirements to Future/Out-of-scope if descoped (with reason)
 
 **Requirement completion criteria:**
 - Requirement is "Complete" when:
-  - Feature is implemented
-  - Feature is verified (tests pass, manual check done)
-  - Feature is committed
+  - Feature/metric is implemented
+  - Verified (tests pass, metrics checked, manual review done)
+  - Committed to repository
 
 </evolution>
 
 <example>
 
 ```markdown
-# Requirements: CommunityApp
+# Requirements: ObjectDetector — v1.0
 
-**Defined:** 2025-01-14
-**Core Value:** Users can share and discuss content with people who share their interests
+**Defined:** 2025-03-10
+**Task:** Object Detection (COCO benchmark)
+**Core Value:** Real-time object detector that beats YOLOv8-s on COCO mAP while running at 60fps on RTX 3080
 
 ## v1 Requirements
 
-### Authentication
+### Data (DATA)
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session persists across browser refresh
+- [ ] **DATA-01**: COCO 2017 train/val/test loaded and split with fixed random seed (42)
+- [ ] **DATA-02**: Augmentation pipeline: random flip, mosaic, color jitter — no val leakage
+- [ ] **DATA-03**: DataLoader achieves ≥500 img/sec throughput on RTX 3080 (batch=32)
 
-### Profiles
+### Model (MODEL)
 
-- [ ] **PROF-01**: User can create profile with display name
-- [ ] **PROF-02**: User can upload avatar image
-- [ ] **PROF-03**: User can write bio (max 500 chars)
-- [ ] **PROF-04**: User can view other users' profiles
+- [ ] **MODEL-01**: Model accepts (B, 3, 640, 640) input, outputs [(B, N, 85)] predictions
+- [ ] **MODEL-02**: Backbone is EfficientNet-B3 pretrained on ImageNet
+- [ ] **MODEL-03**: Total model < 20M parameters (for real-time constraint)
 
-### Content
+### Training (TRAIN)
 
-- [ ] **CONT-01**: User can create text post
-- [ ] **CONT-02**: User can upload image with post
-- [ ] **CONT-03**: User can edit own posts
-- [ ] **CONT-04**: User can delete own posts
-- [ ] **CONT-05**: User can view feed of posts
+- [ ] **TRAIN-01**: SGD with cosine LR, warmup 3 epochs — loss converges by epoch 50
+- [ ] **TRAIN-02**: Validation mAP@0.5 computed each epoch, early stop if no improvement ×10
+- [ ] **TRAIN-03**: Checkpoint every 5 epochs, resume from checkpoint works correctly
 
-### Social
+### Evaluation (EVAL)
 
-- [ ] **SOCL-01**: User can follow other users
-- [ ] **SOCL-02**: User can unfollow users
-- [ ] **SOCL-03**: User can like posts
-- [ ] **SOCL-04**: User can comment on posts
-- [ ] **SOCL-05**: User can view activity feed (followed users' posts)
+- [ ] **EVAL-01**: COCO val2017 mAP@0.5 > 0.48 (beats YOLOv8-s baseline of 0.447)
+- [ ] **EVAL-02**: Inference speed ≥ 60 FPS on RTX 3080 (batch=1, FP16)
+- [ ] **EVAL-03**: Qualitative results: visualized predictions on 20 val images per class
 
-## v2 Requirements
+### Infrastructure (INFRA)
 
-### Notifications
+- [ ] **INFRA-01**: Full training run (300 epochs) completes on single RTX 3080 without OOM
+- [ ] **INFRA-02**: MLflow logs: loss curves, mAP history, hyperparams, checkpoint paths
 
-- **NOTF-01**: User receives in-app notifications
-- **NOTF-02**: User receives email for new followers
-- **NOTF-03**: User receives email for comments on own posts
-- **NOTF-04**: User can configure notification preferences
+## Future Requirements
 
-### Moderation
+### Deployment
 
-- **MODR-01**: User can report content
-- **MODR-02**: User can block other users
-- **MODR-03**: Admin can view reported content
-- **MODR-04**: Admin can remove content
-- **MODR-05**: Admin can ban users
+- **INFRA-03**: ONNX export for production inference
+- **INFRA-04**: TensorRT optimization for edge deployment
+
+### Data
+
+- **DATA-04**: Custom dataset support (non-COCO format ingestion)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Real-time chat | High complexity, not core to community value |
-| Video posts | Storage/bandwidth costs, defer to v2+ |
-| OAuth login | Email/password sufficient for v1 |
-| Mobile app | Web-first, mobile later |
+| Real-time video stream inference | Separate system concern, v2 |
+| Multi-GPU training | Single GPU sufficient for COCO scale |
+| Transformer backbone | Too slow for 60fps constraint with current hardware |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| PROF-01 | Phase 2 | Pending |
-| PROF-02 | Phase 2 | Pending |
-| PROF-03 | Phase 2 | Pending |
-| PROF-04 | Phase 2 | Pending |
-| CONT-01 | Phase 3 | Pending |
-| CONT-02 | Phase 3 | Pending |
-| CONT-03 | Phase 3 | Pending |
-| CONT-04 | Phase 3 | Pending |
-| CONT-05 | Phase 3 | Pending |
-| SOCL-01 | Phase 4 | Pending |
-| SOCL-02 | Phase 4 | Pending |
-| SOCL-03 | Phase 4 | Pending |
-| SOCL-04 | Phase 4 | Pending |
-| SOCL-05 | Phase 4 | Pending |
+| Requirement ID | Description | Phase | Status |
+|----------------|-------------|-------|--------|
+| DATA-01 | COCO data loading + splits | Phase 1 | Pending |
+| DATA-02 | Augmentation pipeline | Phase 1 | Pending |
+| DATA-03 | DataLoader throughput | Phase 1 | Pending |
+| MODEL-01 | Input/output shapes | Phase 2 | Pending |
+| MODEL-02 | EfficientNet-B3 backbone | Phase 2 | Pending |
+| MODEL-03 | Parameter count < 20M | Phase 2 | Pending |
+| TRAIN-01 | Training convergence | Phase 3 | Pending |
+| TRAIN-02 | Validation + early stop | Phase 3 | Pending |
+| TRAIN-03 | Checkpoint resume | Phase 3 | Pending |
+| EVAL-01 | mAP@0.5 > 0.48 | Phase 4 | Pending |
+| EVAL-02 | 60 FPS inference | Phase 4 | Pending |
+| EVAL-03 | Qualitative visualization | Phase 4 | Pending |
+| INFRA-01 | Single GPU no OOM | Phase 3 | Pending |
+| INFRA-02 | MLflow experiment tracking | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 18
+- v1 requirements: 14 total
+- Mapped to phases: 14
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2025-01-14*
-*Last updated: 2025-01-14 after initial definition*
+*Requirements defined: 2025-03-10*
+*Last updated: 2025-03-10 — initial definition*
 ```
 
 </example>

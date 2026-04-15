@@ -53,25 +53,27 @@ Display the complete AI command reference. Output ONLY the reference content. Do
 ### Version Management
 
 **`/my-new-version`**
-Start a new version or milestone.
-- Sets up `.planning/` structure
-- Creates PROJECT.md, STATE.md, ROADMAP.md skeleton
-- Prompts for: task type, dataset, target metrics, baseline, compute
+Initialize a new ML/AI project version or start a new version on an existing project.
+- **New project:** full init flow — config, deep questioning, PROJECT.md, optional research, formal REQUIREMENTS.md with ML IDs, ROADMAP.md
+- **Existing project:** version increment — update PROJECT.md, new REQUIREMENTS.md + ROADMAP.md for this version
+- Creates: PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, config.json
+- Detects brownfield code and offers codebase mapping
+- Commits at each major step (config / project definition / requirements / roadmap)
 
-Usage: `/my-new-version`
+Usage: `/my-new-version [version-name]`
 
 ---
 
 **`/my-provide-context [--papers] [--refs] [--idea] [--update]`**
-Ingest all ML context materials and create KNOWLEDGE.md + ROADMAP.md.
+Ingest ML context materials (papers, code refs, ideas) and update KNOWLEDGE.md.
 
 - `--papers path/`: Summarizes papers (contribution, architecture, results)
 - `--refs path/`: Maps code reference repo (modules, entry points, dependencies)
 - `--idea "text"`: Parses free-form requirements and design decisions
-- `--update`: Adds to existing KNOWLEDGE.md without resetting roadmap
+- `--update`: Adds to existing KNOWLEDGE.md
 
-Auto-runs research after ingesting context. Creates initial phase roadmap.
-Commit: `docs: setup context`
+Enriches KNOWLEDGE.md only. ROADMAP.md is created by `/my-new-version`. If ROADMAP.md doesn't exist yet, creates a basic fallback roadmap.
+Commit: `docs: update context`
 
 Usage: `/my-provide-context --papers ./papers/ --idea "train CLIP-style model on custom data"`
 

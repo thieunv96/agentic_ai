@@ -1,5 +1,5 @@
 <purpose>
-Ingest ML context (papers, code refs, ideas) → organize into KNOWLEDGE.md → auto research → create ROADMAP.md with phases → commit.
+Ingest ML context (papers, code refs, ideas) → organize into KNOWLEDGE.md → optional research → update STATE.md → commit. KNOWLEDGE.md enrichment only; ROADMAP.md is created by /my-new-version. If no ROADMAP.md exists yet, creates a basic one as fallback.
 </purpose>
 
 <process>
@@ -96,14 +96,21 @@ If user chooses Skip: proceed to next step.
 
 Only recommend research when there is genuine uncertainty. If KNOWLEDGE.md already contains sufficient papers and a clear approach, recommend Skip.
 
-## 6. Create ROADMAP.md
+## 6. Update STATE.md or Create ROADMAP.md
 
-Based on research, create `.planning/ROADMAP.md`:
+Check whether `.planning/ROADMAP.md` exists:
+
+**If ROADMAP.md already exists** (created by `/my-new-version`):
+- Update STATE.md to add pointer to KNOWLEDGE.md
+- Note any new insights from context that may affect existing phases
+
+**If no ROADMAP.md** (user ran provide-context before new-version — fallback mode):
+- Create `.planning/ROADMAP.md` from the knowledge gathered:
 ```markdown
 # Roadmap — [Version Name]
 
 ## Goal
-[From PROJECT.md]
+[From PROJECT.md or inferred from context]
 
 ## Phases
 
@@ -117,22 +124,21 @@ Based on research, create `.planning/ROADMAP.md`:
 ## Success Criteria
 [All phases complete + final evaluation passing all target metrics]
 ```
-
 (Adapt phases based on the actual ML task from PROJECT.md)
-
-## 7. Update STATE.md
 
 Update STATE.md:
 - Status: "Ready to discuss — run /my-discuss 1"
 - Add pointer to KNOWLEDGE.md and ROADMAP.md
 
-## 8. Commit
+## 7. Commit
 
 ```bash
-node ".github/my/bin/my-tools.cjs" commit "docs: setup context for [version-name]" --files .planning/KNOWLEDGE.md .planning/ROADMAP.md .planning/STATE.md
+node ".github/my/bin/my-tools.cjs" commit "docs: update context for [version-name]" --files .planning/KNOWLEDGE.md .planning/STATE.md
 ```
 
-## 9. Show Next Step
+(Include `.planning/ROADMAP.md` in commit only if ROADMAP.md was newly created in fallback mode.)
+
+## 8. Show Next Step
 
 ```
 ---

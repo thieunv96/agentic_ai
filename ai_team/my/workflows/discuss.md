@@ -13,7 +13,7 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 
 Parse: `phase_dir`, `phase_number`, `phase_name`, `commit_docs`.
 
-Read: STATE.md, PROJECT.md, ROADMAP.md, KNOWLEDGE.md, prior CONTEXT.md files.
+Read: STATE.md, PROJECT.md, ROADMAP.md, REQUIREMENTS.md, KNOWLEDGE.md, prior CONTEXT.md files.
 
 Check --auto flag: if present, pick recommended defaults without asking.
 Check --batch flag: if present, present all discussion areas at once.
