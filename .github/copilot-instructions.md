@@ -4,7 +4,7 @@
 
 This repo contains the **AI development framework** — a structured, AI-assisted workflow system optimized for Computer Vision and Vision-Language Model (VLM) development. The `ai_team/` directory deploys to `.github/` in target ML projects.
 
-Current version: `ai_team/ai/VERSION`
+Current version: `ai_team/my/VERSION`
 
 ## Architecture
 
@@ -13,12 +13,12 @@ Current version: `ai_team/ai/VERSION`
 `ai_team/` maps directly to `.github/` in any project where The AI framework is installed:
 ```
 ai_team/
-├── skills/ai-*/SKILL.md     → entry points (slash commands)
+├── skills/my-*/SKILL.md     → entry points (slash commands)
 ├── agents/*.agent.md            → subagent prompt definitions
-├── ai/workflows/*.md        → workflow implementations
-├── ai/references/*.md       → shared ML knowledge
-├── ai/templates/            → artifact templates
-├── ai/bin/ai-tools.cjs  → CLI for commits, state, config
+├── my/workflows/*.md        → workflow implementations
+├── my/references/*.md       → shared ML knowledge
+├── my/templates/            → artifact templates
+├── my/bin/my-tools.cjs  → CLI for commits, state, config
 ├── scripts/                     → Python hooks
 └── hooks/pre-tool-use.json      → Claude Code PreToolUse hook
 ```
@@ -27,31 +27,31 @@ ai_team/
 
 | Command | Purpose |
 |---------|---------|
-| `ai-new-version <name>` | Init version with ML project template |
-| `ai-provide-context` | Ingest papers/code refs → research → roadmap |
-| `ai-discuss <phase>` | Discuss phase decisions → CONTEXT.md + log |
-| `ai-plan <phase>` | Create PLAN.md (ML-aware) |
-| `ai-implement <phase>` | Execute phase code |
-| `ai-evaluate <phase>` | Evaluate model metrics → EVALUATION.md |
-| `ai-debug <issue>` | Debug training/evaluation issues |
-| `ai-status` | Show progress + metrics |
-| `ai-continue` | Auto-run next step |
-| `ai-release-version <v>` | Close version, archive, tag |
+| `my-new-version <name>` | Init version with ML project template |
+| `my-provide-context` | Ingest papers/code refs → research → roadmap |
+| `my-discuss <phase>` | Discuss phase decisions → CONTEXT.md + log |
+| `my-plan <phase>` | Create PLAN.md (ML-aware) |
+| `my-implement <phase>` | Execute phase code |
+| `my-evaluate <phase>` | Evaluate model metrics → EVALUATION.md |
+| `my-debug <issue>` | Debug training/evaluation issues |
+| `my-status` | Show progress + metrics |
+| `my-continue` | Auto-run next step |
+| `my-release-version <v>` | Close version, archive, tag |
 
 ### The 10 Agents
 
 | Agent | Role |
 |-------|------|
-| `ai-planner` | Creates PLAN.md with ML-aware task decomposition |
-| `ai-executor` | Implements Python/PyTorch/ML code |
-| `ai-roadmapper` | Creates phase roadmap from ML requirements |
-| `ai-researcher` | Researches CV/VLM papers, architectures, SOTA |
-| `ai-research-synthesizer` | Synthesizes research into actionable insights |
-| `ai-evaluator` | Evaluates model: metrics, benchmarks, go/no-go |
-| `ai-data-analyst` | Analyzes CV datasets (COCO, ImageNet, VQA, etc.) |
-| `ai-debugger` | Debugs training/CUDA/data pipeline issues |
-| `ai-plan-checker` | Verifies plan quality before execution |
-| `ai-codebase-mapper` | Maps existing codebase/code references |
+| `my-planner` | Creates PLAN.md with ML-aware task decomposition |
+| `my-executor` | Implements Python/PyTorch/ML code |
+| `my-roadmapper` | Creates phase roadmap from ML requirements |
+| `my-researcher` | Researches CV/VLM papers, architectures, SOTA |
+| `my-research-synthesizer` | Synthesizes research into actionable insights |
+| `my-evaluator` | Evaluates model: metrics, benchmarks, go/no-go |
+| `my-data-analyst` | Analyzes CV datasets (COCO, ImageNet, VQA, etc.) |
+| `my-debugger` | Debugs training/CUDA/data pipeline issues |
+| `my-plan-checker` | Verifies plan quality before execution |
+| `my-codebase-mapper` | Maps existing codebase/code references |
 
 ## Key Conventions
 
@@ -59,10 +59,10 @@ ai_team/
 Every `SKILL.md` has YAML frontmatter:
 ```yaml
 ---
-name: ai-evaluate
+name: my-evaluate
 description: Evaluate ML model performance...
 argument-hint: "<phase-number> [--quick] [--full]"
-agent: ai-evaluator
+agent: my-evaluator
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, AskUserQuestion
 ---
 ```
@@ -70,7 +70,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, AskUserQuestion
 ### ai-tools CLI Pattern
 Always handle `@file:*` response:
 ```bash
-INIT=$(node ".github/ai/bin/ai-tools.cjs" init execute-phase "1")
+INIT=$(node ".github/my/bin/my-tools.cjs" init execute-phase "1")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -94,7 +94,7 @@ Orchestrators use ~15% context budget. Each spawned subagent gets a fresh 100% c
 `hooks/pre-tool-use.json` → runs `scripts/check_dangerous_command.py`. Exit 2 = hard block on dangerous shell commands.
 
 ### Adding a New Skill
-1. Create `skills/ai-{name}/SKILL.md` with frontmatter
-2. Create matching `ai/workflows/{name}.md` with workflow logic
-3. Update `ai-file-manifest.json` with checksums
+1. Create `skills/my-{name}/SKILL.md` with frontmatter
+2. Create matching `my/workflows/{name}.md` with workflow logic
+3. Update `my-file-manifest.json` with checksums
 4. Reference ML-specific docs in `<execution_context>` if relevant
