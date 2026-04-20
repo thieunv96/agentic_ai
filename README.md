@@ -11,122 +11,226 @@ A personal, modular AI-assisted development framework for **Computer Vision** an
 This framework provides a structured, opinionated workflow for ML/AI model development — from idea and research all the way through training, evaluation, quantization, and release. It deploys to `.github/` in any ML project and integrates directly with GitHub Copilot.
 
 ```
-ai_team/  →  deploy to  →  .github/
+ai/  →  deploy to  →  .github/
 ```
 
 ---
 
 ## Quick Start
 
-1. Copy `ai_team/` contents into `.github/` of your ML project
+1. Copy `ai/` contents into `.github/` of your ML project
 2. Start a new version: `/my-new-version`
-3. Ingest context (papers, code refs, ideas): `/my-provide-context`
-4. Follow the workflow loop below
+3. Discuss first phase (context gathering is built-in): `/my-discuss 1`
+4. Follow the phase loop: discuss → plan → implement → evaluate
 
 ---
 
 ## Core Workflow
 
 ```
-/my-new-version          → Initialize a new version/milestone
-/my-provide-context      → Ingest papers, code refs, ideas → KNOWLEDGE.md + ROADMAP.md
-/my-discuss <phase>      → Discuss and lock phase decisions → CONTEXT.md
-/my-plan <phase>         → Create detailed phase plan → PLAN.md
-/my-implement <phase>    → Execute plan → code + commits
+/my-new-version          → Initialize version: PROJECT.md + ROADMAP.md  [COMMIT]
+/my-discuss <phase>      → Gather context + lock decisions → KNOWLEDGE.md + CONTEXT.md  [COMMIT]
+/my-plan <phase>         → Create detailed phase plan → PLAN.md files
+/my-implement <phase>    → Execute plan → code + per-task commits  [COMMITS]
 /my-evaluate <phase>     → Evaluate metrics vs targets → EVALUATION.md
 /my-debug [issue]        → Systematic debugging with persistent state
 /my-status               → Current project status and next action
 /my-continue             → Resume from last checkpoint
-/my-release-version <v>  → Close version with summary + git tag
+/my-release-version <v>  → Close version with summary + git tag  [COMMIT]
 ```
 
 ---
 
-## Workflow Visualization
+## Full Workflow Visualization
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    MY ML/AI FRAMEWORK WORKFLOW                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     MY ML/AI FRAMEWORK — FULL WORKFLOW                      │
+└─────────────────────────────────────────────────────────────────────────────┘
 
   /my-new-version
-      Ask setup questions (each with WHY explanation)
-      Ask: "Anything else to add?"
-      Creates: PROJECT.md, STATE.md
-      ✗ No commit
+  ├─ AskUserQuestion: project type, dataset, target metrics, compute
+  ├─ Spawn: my-roadmapper
+  ├─ Creates: PROJECT.md, ROADMAP.md, STATE.md
+  └─ ✅ COMMIT #1 ── "docs: initialize [project] ([N] phases)"
 
-  /my-provide-context [--papers] [--refs] [--idea]
-      Ingest: papers / code refs / ideas → KNOWLEDGE.md
-      Ask: "Anything else to add before roadmap?"
-      Ask: "Run research?" ──────────────────────────────────[Optional]
-              ├─ Quick research  (recommended: topic well-known)
-              ├─ Deep research   (recommended: complex/uncertain)
-              └─ Skip            (recommended: context already clear)
-      Creates: ROADMAP.md
-      ✅ COMMIT #1 ── "docs: setup context"
+  ╔═══════════════════════════════════════════════╗
+  ║         PHASE LOOP  (repeat for each phase)   ║
+  ╚═══════════════════════════════════════════════╝
 
-  ╔══════════════════════════════════════╗
-  ║         PHASE LOOP (repeat N)        ║
-  ╚══════════════════════════════════════╝
+  /my-discuss N ──────────────────────────────── DISCUSS & LOCK
+  │
+  │  ── Step 0: Context Gathering ──────────────────────────────
+  │  │
+  │  │  AskUserQuestion: "Any papers, code refs, or ideas to add?"
+  │  │  ├─ Yes → collect papers / code refs / ideas (via AskUserQuestion)
+  │  │  │        → create or update KNOWLEDGE.md
+  │  │  └─ Skip → KNOWLEDGE.md already up to date
+  │  │
+  │  ── Step 1: Identify Decision Areas (by phase type) ─────────
+  │  │
+  │  │  Data Pipeline:  format · augmentation · DataLoader · splits
+  │  │  Architecture:   backbone · pretrained weights · head · resolution
+  │  │  Training:       optimizer · scheduler · batch · precision · LoRA
+  │  │  Evaluation:     benchmarks · scripts · analysis depth
+  │  │
+  │  ── Step 2: Batch Decisions (DEFAULT: all areas at once) ────
+  │  │
+  │  │  Single AskUserQuestion for all areas together
+  │  │  Each area: options + trade-offs + recommendation
+  │  │  --step flag → sequential mode (one area at a time)
+  │  │  --auto flag → pick all recommended defaults, skip asking
+  │  │
+  │  ── Step 3: Lock ─────────────────────────────────────────────
+  │  │
+  │  │  Creates: N-CONTEXT.md    (locked decisions for planner/executor)
+  │  │  Creates: N-DISCUSSION-LOG.md  (audit trail)
+  │  │
+  └──└─ ✅ COMMIT #2 ── "docs: phase N context locked - [name]"
 
-  /my-discuss N
-      Present decision areas (with background + trade-offs)
-      Discuss each area (explain WHY before each question)
-      Ask: "Anything else before locking context?"
-      Creates: N-CONTEXT.md, N-DISCUSSION-LOG.md
-      ✗ No commit
+  /my-plan N ──────────────────────────────────── PLANNING
+  │
+  │  ── Step 1: Optional Research ───────────────────────────────
+  │  │
+  │  │  Auto-skip when: KNOWLEDGE.md has ≥2 relevant papers
+  │  │                  AND CONTEXT.md is clear and complete
+  │  │  Otherwise → AskUserQuestion:
+  │  │  ├─ Quick (~10 min): scan key papers for this phase type
+  │  │  ├─ Deep  (~30 min): full survey, approach comparison, gap analysis
+  │  │  └─ Skip:  go straight to planning
+  │  │
+  │  ── Step 2: Plan — spawn my-planner ─────────────────────────
+  │  │
+  │  │  Decomposes phase into 2–4 PLAN.md files
+  │  │  Each plan: 2–3 tasks with  files + action + verify + done
+  │  │  Waves assigned by dependency graph
+  │  │
+  │  ── Step 3: Verify — my-plan-checker (1 pass only) ──────────
+  │  │
+  │  │  Issues found → my-planner gets ONE revision → proceed
+  │  │
+  │  ── Step 4: Adjust ───────────────────────────────────────────
+  │  │
+  │  │  AskUserQuestion: "Anything to adjust before finalizing?"
+  │  │
+  └──└─ ✗ No commit  (plans are intermediate artifacts)
 
-  /my-plan N
-      Ask: "Run research for this phase?" ──────────────────[Optional]
-              ├─ Quick / Deep / Skip
-      Spawn my-planner → PLAN.md
-      Verify with my-plan-checker
-      Ask: "Anything to adjust before finalizing?"
-      ✅ COMMIT #2 ── "docs: plan phase N"
+  /my-implement N ─────────────────────────────── EXECUTION
+  │
+  │  Discover: list PLAN.md files, build dependency graph, assign waves
+  │
+  │  Wave 1 ─────────────────── parallel spawn ─────────────────
+  │  ├─ Executor A  (plan 01)  tasks → per-task commit
+  │  ├─ Executor B  (plan 02)  tasks → per-task commit
+  │  └─ Executor C  (plan 03)  tasks → per-task commit
+  │          Each task commit: feat/fix/train/data/model(N-P): desc
+  │
+  │  Wave 2 ─────────────────── parallel spawn ─────────────────
+  │  ├─ Executor D  (plan 04, depends on plan 01)
+  │  └─ Executor E  (plan 05, depends on plan 02)
+  │  (only starts after all Wave 1 executors complete)
+  │
+  │  Each plan completion → metadata commit:
+  │      docs(N-NN): complete [plan-name] plan
+  │
+  │  Deviation rules (auto-applied during execution):
+  │  Rule 1: Auto-fix bugs (broken behavior, errors, incorrect output)
+  │  Rule 2: Auto-add missing critical (error handling, auth, CSRF/CORS)
+  │  Rule 3: Auto-fix blockers (missing deps, wrong types, broken imports)
+  │  Rule 4: STOP → AskUserQuestion  (architectural changes → user decides)
+  │
+  └─ ✅ COMMITS ── per-task + per-plan metadata (many atomic commits)
 
-  /my-implement N
-      Spawn my-executor agents (wave-based parallel)
-      Executors write code to disk  ✗ no per-task commits
-      All waves complete → SUMMARY.md
-      ✅ COMMIT #3 ── "feat/train/data(phase-N): implement ..."
+  /my-evaluate N ──────────────────────────────── EVALUATION
+  │
+  │  Spawn: my-evaluator
+  │  Checks: metrics vs CONTEXT.md targets
+  │  Creates: EVALUATION.md  (metrics table, examples, go/no-go)
+  │  ✗ No commit
+  │
+  ├─ ✅ GO     → /my-discuss N+1   (next phase)
+  └─ ❌ NO-GO  → /my-implement N --gaps-only
+                  (creates gap-closure PLAN.md files, re-executes)
+                or /my-debug [issue]  (scientific investigation)
 
-  /my-evaluate N
-      Check metrics vs CONTEXT.md targets
-      Produces: EVALUATION.md with go/no-go
-      ✗ No commit
-      │
-      ├─ ✅ Go  → next phase (/my-discuss N+1)
-      └─ ❌ No-go → /my-debug or iterate
-
-  └──────── repeat until all phases done ──────────────────┘
+  └──────── repeat until all phases complete ───────────────────
 
   /my-release-version vX.X.X
-      Creates: VERSION-SUMMARY.md + git tag
-      ✅ COMMIT ── "chore: release vX.X.X"
+  ├─ Creates: VERSION-SUMMARY.md + git tag
+  └─ ✅ COMMIT ── "chore: release vX.X.X"
 ```
-
-> **Commit discipline:** Only 3 commit points per phase (roadmap / plan / implementation).
-> No commits during discuss, evaluate, research, debug, or status sessions.
 
 ---
 
-## All 15 Commands
+## Commit Discipline
+
+Only **3 defined commit points** per project lifecycle:
+
+| Point | When | Message format |
+|-------|------|----------------|
+| **#1 Version init** | After `/my-new-version` | `docs: initialize [project] ([N] phases)` |
+| **#2 Context locked** | After `/my-discuss N` | `docs: phase N context locked - [name]` |
+| **#3 Implementation** | After each task in `/my-implement N` | `feat/train/data(N-P): [task name]` + plan metadata |
+
+No commits during: plan, evaluate, research, debug, status, or continue sessions.
+
+---
+
+## Interaction Design
+
+All user interactions happen through **AskUserQuestion** — a structured dialog that presents options with explanations. This applies even when the user wants to explain freely:
+
+```
+Standard interaction:
+  header: "Backbone"
+  question: "Which backbone for Phase 2?"
+  options: ["ViT-B/16 (balanced)", "ViT-L/14 (best quality)", "ConvNeXt-B (efficient)"]
+
+When user wants to explain freely:
+  header: "Tell me more"
+  question: "Go ahead — what are you thinking?"
+  options: ["That's all"]   ← user types freely via Other field
+```
+
+No plain-text prompts. Consistent structured interaction throughout.
+
+---
+
+## Model Profiles
+
+Agents are assigned models based on the active profile. Some agents are **pinned to Claude Opus 4.7** regardless of profile because their work quality has the highest downstream impact.
+
+| Agent | `quality` | `balanced` | `budget` | Role |
+|-------|-----------|------------|----------|------|
+| `my-planner` | opus | opus | sonnet | Architecture decisions |
+| **`my-executor`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Real-time deviation decisions |
+| **`my-debugger`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Hypothesis-driven investigation |
+| **`my-quantizer`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Accuracy/latency tradeoffs |
+| **`ai-phase-researcher`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Literature synthesis |
+| `my-plan-checker` | sonnet | sonnet | haiku | Plan validation |
+| `my-codebase-mapper` | sonnet | haiku | haiku | Exploration |
+
+> **Pinned agents** use `claude-opus-4-7` across all profiles (fallback: `claude-opus-4-6`).
+> Set profile in `.note/config.json`: `{ "model_profile": "balanced" }`
+
+---
+
+## All 14 Commands
 
 ### Version Management
 
 | Command | Description |
 |---------|-------------|
-| `/my-new-version` | Start a new version or milestone. Creates `.planning/` structure, PROJECT.md, STATE.md, ROADMAP.md skeleton. |
-| `/my-provide-context [--papers] [--refs] [--idea] [--update]` | Ingest ML materials (papers, code refs, ideas) → KNOWLEDGE.md + initial ROADMAP.md. Asks user before running research (quick/deep/skip). |
+| `/my-new-version` | Start a new version or milestone. Creates `.note/` structure, PROJECT.md, STATE.md, ROADMAP.md via `my-roadmapper`. |
 | `/my-release-version <v>` | Close version with VERSION-SUMMARY.md, git tag, and archived planning artifacts. |
 
 ### Phase Loop
 
 | Command | Description |
 |---------|-------------|
-| `/my-discuss <phase>` | Lock implementation decisions for a phase → CONTEXT.md + DISCUSSION-LOG.md. Use `--auto` for agent defaults, `--batch` for all-at-once. |
-| `/my-plan <phase>` | Generate PLAN.md with tasks and verification criteria via `my-planner` agent. |
-| `/my-implement <phase>` | Execute PLAN.md atomically via `my-executor` agent. Produces SUMMARY.md + per-task commits. |
+| `/my-discuss <phase>` | Gather context (papers, code refs, ideas → KNOWLEDGE.md) then lock decisions → CONTEXT.md + DISCUSSION-LOG.md. Batch mode by default. Use `--step` for sequential, `--auto` for agent defaults. |
+| `/my-plan <phase>` | Generate PLAN.md files via `my-planner` agent. Auto-skips research when KNOWLEDGE.md is comprehensive. Verifies with `my-plan-checker` (1 pass). |
+| `/my-implement <phase>` | Execute PLAN.md wave-by-wave via parallel `my-executor` agents. Per-task commits + plan metadata commits. |
 | `/my-evaluate <phase> [--quick\|--full]` | Evaluate model vs CONTEXT.md targets → EVALUATION.md with go/no-go decision. |
 
 ### Debugging & Navigation
@@ -141,7 +245,7 @@ ai_team/  →  deploy to  →  .github/
 
 | Command | Description |
 |---------|-------------|
-| `/my-research [--quick\|--deep] <topic>` | Gray-area / frontier ML research. `--quick`: 3-5 papers + recommendation. `--deep`: full literature survey, gap analysis, synthesis. Output: `.planning/research/{slug}-RESEARCH.md` |
+| `/my-research [--quick\|--deep] <topic>` | Gray-area / frontier ML research. `--quick`: 3-5 papers + recommendation. `--deep`: full literature survey, gap analysis, synthesis. Output: `.note/research/{slug}-RESEARCH.md` |
 | `/my-map-codebase [path]` | Map an existing codebase into 7 structured docs: STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS. |
 
 ### Data Engineering
@@ -166,31 +270,31 @@ ai_team/  →  deploy to  →  .github/
 
 ## Agents
 
-| Agent | Role |
-|-------|------|
-| `my-planner` | Creates PLAN.md with ML-aware task decomposition |
-| `my-executor` | Implements Python/PyTorch/ML code |
-| `my-roadmapper` | Creates phase roadmap from ML requirements |
-| `my-researcher` | Researches CV/VLM papers, architectures, SOTA |
-| `my-research-synthesizer` | Synthesizes research into actionable insights |
-| `my-evaluator` | Evaluates model: metrics, benchmarks, go/no-go |
-| `my-data-analyst` | Analyzes CV datasets (COCO, ImageNet, VQA, etc.) |
-| `my-data-engineer` | Builds data pipelines, format conversions, packing |
-| `my-debugger` | Debugs training/CUDA/data pipeline issues |
-| `my-plan-checker` | Verifies plan quality before execution |
-| `my-codebase-mapper` | Maps existing codebase/code references |
-| `my-quantizer` | Quantizes models (FP16/INT8/ONNX/TensorRT/CoreML) |
+| Agent | Role | Model |
+|-------|------|-------|
+| `my-planner` | Creates PLAN.md with ML-aware task decomposition | opus |
+| `my-executor` | Implements Python/PyTorch/ML code | **opus-4-7** |
+| `my-roadmapper` | Creates phase roadmap from ML requirements | sonnet |
+| `my-researcher` | Researches CV/VLM papers, architectures, SOTA | **opus-4-7** |
+| `my-research-synthesizer` | Synthesizes research into actionable insights | sonnet |
+| `my-evaluator` | Evaluates model: metrics, benchmarks, go/no-go | sonnet |
+| `my-data-analyst` | Analyzes CV datasets (COCO, ImageNet, VQA, etc.) | sonnet |
+| `my-data-engineer` | Builds data pipelines, format conversions, packing | sonnet |
+| `my-debugger` | Debugs training/CUDA/data pipeline issues | **opus-4-7** |
+| `my-plan-checker` | Verifies plan quality before execution | sonnet |
+| `my-codebase-mapper` | Maps existing codebase/code references | haiku |
+| `my-quantizer` | Quantizes models (FP16/INT8/ONNX/TensorRT/CoreML) | **opus-4-7** |
 
 ---
 
-## `.planning/` Structure
+## `.note/` Structure
 
 ```
-.planning/
+.note/
 ├── PROJECT.md              # Task, dataset, target metrics, compute
 ├── ROADMAP.md              # Phase breakdown with goals
 ├── STATE.md                # Project memory — current phase, best metric
-├── KNOWLEDGE.md            # Papers, code refs, key insights
+├── KNOWLEDGE.md            # Papers, code refs, key insights (built in /my-discuss)
 ├── DATA-PIPELINE.md        # Data preparation pipeline (if run)
 ├── VERSION-REPORT.md       # Final version summary (after release)
 ├── research/
@@ -220,14 +324,16 @@ ai_team/  →  deploy to  →  .github/
 ## Commit Conventions
 
 ```
+feat(phase-N): description     — new feature
+fix(phase-N): description      — bug fix
 train(phase-N): description    — training code
 data(phase-N): description     — dataset/pipeline
 model(phase-N): description    — architecture
 eval(phase-N): description     — evaluation code
 experiment(phase-N): desc      — experiment configs/results
-docs: description              — planning docs
-feat(phase-N): description     — new features
-fix(phase-N): description      — bug fixes
+docs(phase-N): description     — plan completion metadata
+docs: description              — project-level planning docs
+chore: description             — release, tooling
 ```
 
 ---
@@ -235,12 +341,12 @@ fix(phase-N): description      — bug fixes
 ## Repository Structure
 
 ```
-ai_team/                       ← deploy contents to .github/
+ai/                            ← deploy contents to .github/
 ├── skills/my-*/SKILL.md       ← slash command entry points
 ├── agents/my-*.agent.md       ← specialized ML agents
 ├── my/
-│   ├── workflows/*.md         ← workflow logic
-│   ├── references/*.md        ← ML knowledge base
+│   ├── workflows/*.md         ← workflow logic (discuss, plan, implement, etc.)
+│   ├── references/*.md        ← ML knowledge base (model profiles, git, TDD, etc.)
 │   ├── templates/             ← artifact templates
 │   └── bin/my-tools.cjs       ← CLI for state, commits, config
 ├── hooks/pre-tool-use.json    ← safety hooks

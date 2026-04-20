@@ -25,7 +25,7 @@ Has $argument [version name]:
   - Verifier (yes/no)
   - AI model profile
 
-- Save to `.planning/config.json`
+- Save to `.note/config.json`
 - Commit config
 
 4. QUESTIONING / CONTEXT
@@ -75,7 +75,7 @@ Commit PROJECT.md
   - Research / Plan check / Verifier
   - Model profile
 
-- Save `.planning/config.json`
+- Save `.note/config.json`
 - Commit
 
 7. RESEARCH
