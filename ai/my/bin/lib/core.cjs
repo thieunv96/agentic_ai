@@ -208,6 +208,8 @@ function loadConfig(cwd) {
     resolve_model_ids: false, // false: return alias as-is | true: map to full the agent model ID | "omit": return '' (runtime uses its default)
     context_window: 200000, // default 200k; set to 1000000 for Opus/Sonnet 4.6 1M models
     phase_naming: 'sequential', // 'sequential' (default, auto-increment) or 'custom' (arbitrary string IDs)
+    current_version: null,      // active version slug, e.g. "v1.2" — scopes .note/ paths
+    docs_dir: 'docs',           // output directory for /my-doc generated documentation
   };
 
   try {
@@ -300,6 +302,8 @@ function loadConfig(cwd) {
       context_window: get('context_window') ?? defaults.context_window,
       phase_naming: get('phase_naming') ?? defaults.phase_naming,
       model_overrides: parsed.model_overrides || null,
+      current_version: get('current_version') ?? defaults.current_version,
+      docs_dir: get('docs_dir') ?? defaults.docs_dir,
     };
   } catch {
     return defaults;
@@ -530,17 +534,26 @@ function withPlanningLock(cwd, fn) {
 }
 
 /**
- * Get the .note directory path, workstream-aware.
- * When a workstream is active (via explicit ws arg or AI_WORKSTREAM env var),
- * returns `.note/workstreams/{ws}/`. Otherwise returns `.note/`.
+ * Get the .note directory path, version- and workstream-aware.
+ *
+ * Resolution order (first match wins):
+ *   1. Explicit `ws` arg or AI_WORKSTREAM env var  → `.note/workstreams/{ws}/`
+ *   2. `current_version` in `.note/config.json`    → `.note/{version}/`
+ *   3. Fallback                                     → `.note/`
  *
  * @param {string} cwd - project root
  * @param {string} [ws] - explicit workstream name; if omitted, checks AI_WORKSTREAM env var
  */
 function planningDir(cwd, ws) {
   if (ws === undefined) ws = process.env.AI_WORKSTREAM || null;
-  if (!ws) return path.join(cwd, '.note');
-  return path.join(cwd, '.note', 'workstreams', ws);
+  if (ws) return path.join(cwd, '.note', 'workstreams', ws);
+  // Version-scoped: read current_version from config.json (fast direct read, no full loadConfig)
+  try {
+    const configPath = path.join(cwd, '.note', 'config.json');
+    const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    if (cfg.current_version) return path.join(cwd, '.note', cfg.current_version);
+  } catch {}
+  return path.join(cwd, '.note');
 }
 
 /** Always returns the root .note/ path, ignoring workstreams. For shared resources. */
@@ -549,9 +562,10 @@ function planningRoot(cwd) {
 }
 
 /**
- * Get common .note file paths, workstream-aware.
- * Scoped paths (state, roadmap, phases, requirements) resolve to the active workstream.
- * Shared paths (project, config) always resolve to the root .note/.
+ * Get common .note file paths, version- and workstream-aware.
+ * All scoped paths (state, roadmap, project, phases, requirements) resolve inside the
+ * active version directory (e.g. `.note/v1.2/`) or workstream directory.
+ * Only `config` always resolves to the root `.note/config.json` (version-agnostic).
  */
 function planningPaths(cwd, ws) {
   const base = planningDir(cwd, ws);
@@ -560,8 +574,8 @@ function planningPaths(cwd, ws) {
     planning: base,
     state: path.join(base, 'STATE.md'),
     roadmap: path.join(base, 'ROADMAP.md'),
-    project: path.join(root, 'PROJECT.md'),
-    config: path.join(root, 'config.json'),
+    project: path.join(base, 'PROJECT.md'),    // version-scoped (was root)
+    config: path.join(root, 'config.json'),    // always root — version-agnostic
     phases: path.join(base, 'phases'),
     requirements: path.join(base, 'REQUIREMENTS.md'),
   };

@@ -6,7 +6,7 @@
 - When a command says to spawn a subagent, prefer a matching custom agent from `.github/agents`.
 - Do not apply my framework workflows unless the user explicitly asks for them.
 - After completing any `my-*` command (or any deliverable it triggers), ALWAYS offer the user the next step by prompting via `ask_user`; repeat this feedback loop until the user explicitly indicates they are done.
-- This framework is optimized for ML/AI development (Computer Vision, VLMs). The 14 commands are: my-new-version, my-discuss, my-plan, my-implement, my-evaluate, my-debug, my-status, my-continue, my-release-version, my-research, my-map-codebase, my-data-prep, my-quantize, my-report.
+- This framework is optimized for ML/AI development (Computer Vision, VLMs). The 15 commands are: my-new-version, my-discuss, my-plan, my-implement, my-evaluate, my-doc, my-debug, my-status, my-continue, my-release-version, my-research, my-map-codebase, my-data-prep, my-quantize, my-report.
 
 ## Behavior Principles
 

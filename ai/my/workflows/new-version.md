@@ -17,6 +17,16 @@ Parse: `commit_docs`, `project_exists`, `has_git`, `project_path`.
 - If no git repo: `git init` (explain: "Initializing git so we can track planning artifacts and phase commits.")
 - Otherwise: continue to step 2.
 
+Determine **version name** from `$ARGUMENTS` (e.g., `v1.0`, `v2.3`). Once known:
+
+```bash
+# Register version as active — all .note/ paths now resolve to .note/[version-name]/
+node ".github/my/bin/my-tools.cjs" config set current_version [version-name]
+mkdir -p .note/[version-name]/phases
+```
+
+All planning artifacts for this version are stored in `.note/[version-name]/`.
+
 ## 2. Brownfield Check
 
 Detect whether the repo already has substantial code (non-.note files, non-README files).
@@ -169,7 +179,7 @@ Create `.note/PROJECT.md`:
 
 Commit:
 ```bash
-node ".github/my/bin/my-tools.cjs" commit "docs: project definition for [version-name]" --files .note/PROJECT.md
+node ".github/my/bin/my-tools.cjs" commit "docs: project definition for [version-name]" --files .note/[version-name]/PROJECT.md
 ```
 
 ## 6. Research (Optional)
@@ -247,7 +257,7 @@ Confirm (INTERACTIVE MODE only):
 
 Commit:
 ```bash
-node ".github/my/bin/my-tools.cjs" commit "docs: requirements v1 for [version-name]" --files .note/REQUIREMENTS.md .note/PROJECT.md
+node ".github/my/bin/my-tools.cjs" commit "docs: requirements v1 for [version-name]" --files .note/[version-name]/REQUIREMENTS.md .note/[version-name]/PROJECT.md
 ```
 
 ## 8. Create Roadmap
@@ -301,7 +311,7 @@ Loop until approved.
 
 Commit:
 ```bash
-node ".github/my/bin/my-tools.cjs" commit "docs: roadmap for [version-name] ([N] phases, [M] requirements)" --files .note/ROADMAP.md .note/REQUIREMENTS.md .note/STATE.md
+node ".github/my/bin/my-tools.cjs" commit "docs: roadmap for [version-name] ([N] phases, [M] requirements)" --files .note/[version-name]/ROADMAP.md .note/[version-name]/REQUIREMENTS.md .note/[version-name]/STATE.md
 ```
 
 ## 9. Final Output
@@ -315,11 +325,11 @@ Show:
 **Phases:** [N] phases | **Requirements:** [M] v1 requirements
 
 **Files created:**
-- `.note/PROJECT.md` — project definition
-- `.note/REQUIREMENTS.md` — [M] requirements with IDs
-- `.note/ROADMAP.md` — [N]-phase roadmap
-- `.note/STATE.md` — current position
-- `.note/config.json` — workflow config
+- `.note/[version-name]/PROJECT.md` — project definition
+- `.note/[version-name]/REQUIREMENTS.md` — [M] requirements with IDs
+- `.note/[version-name]/ROADMAP.md` — [N]-phase roadmap
+- `.note/[version-name]/STATE.md` — current position
+- `.note/config.json` — workflow config (shared, version-agnostic)
 
 ## ▶ Next Step
 
@@ -331,7 +341,6 @@ Show:
 
 ---
 **Also available:**
-- `/my-provide-context` — add papers/code refs to KNOWLEDGE.md
 - `/my-status` — review full roadmap
 ```
 
@@ -410,7 +419,7 @@ Status: Defining requirements for [version-name]
 ### E7. Cleanup + Commit
 
 ```bash
-node ".github/my/bin/my-tools.cjs" commit "chore: start [version-name] — update PROJECT.md + STATE.md" --files .note/PROJECT.md .note/STATE.md
+node ".github/my/bin/my-tools.cjs" commit "chore: start [version-name] — update PROJECT.md + STATE.md" --files .note/[version-name]/PROJECT.md .note/STATE.md
 ```
 
 ### E8. Optional Research

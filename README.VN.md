@@ -28,15 +28,16 @@ ai/  →  triển khai vào  →  .github/
 ## Quy Trình Chính
 
 ```
-/my-new-version          → Khởi tạo version: PROJECT.md + ROADMAP.md  [COMMIT]
+/my-new-version          → Khởi tạo version: .note/vX.Y/ + ROADMAP.md  [COMMIT]
 /my-discuss <phase>      → Thu thập context + chốt quyết định → KNOWLEDGE.md + CONTEXT.md  [COMMIT]
 /my-plan <phase>         → Tạo kế hoạch chi tiết → các file PLAN.md
 /my-implement <phase>    → Thực thi kế hoạch → code + per-task commits  [COMMITS]
 /my-evaluate <phase>     → Đánh giá metrics so với mục tiêu → EVALUATION.md
+/my-doc [--phase N|--release] → Tạo tài liệu user-centric để đồng bộ XWiki
 /my-debug [vấn đề]       → Debug có hệ thống với trạng thái bền vững
 /my-status               → Trạng thái hiện tại và bước tiếp theo
 /my-continue             → Tiếp tục từ checkpoint cuối
-/my-release-version <v>  → Đóng version với tóm tắt + git tag  [COMMIT]
+/my-release-version <v>  → Dọn dẹp intermediate, hoàn thiện docs, tag release  [COMMIT]
 ```
 
 ---
@@ -221,8 +222,8 @@ Các agent được gán model dựa trên profile đang hoạt động. Một s
 
 | Lệnh | Mô tả |
 |------|-------|
-| `/my-new-version` | Bắt đầu version hoặc milestone mới. Tạo cấu trúc `.note/`, PROJECT.md, STATE.md, ROADMAP.md qua `my-roadmapper`. |
-| `/my-release-version <v>` | Đóng version với VERSION-SUMMARY.md, git tag và lưu trữ planning artifacts. |
+| `/my-new-version` | Bắt đầu version mới. Tạo `.note/{version}/` với PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md. Ghi `current_version` vào config. |
+| `/my-release-version <v>` | Xác minh phases, tạo release docs, dọn sạch intermediate artifacts (PLAN/SUMMARY), tag release. Context files được giữ lại để truy vết. |
 
 ### Vòng Lặp Phase
 
@@ -232,6 +233,14 @@ Các agent được gán model dựa trên profile đang hoạt động. Một s
 | `/my-plan <phase>` | Tạo file PLAN.md qua agent `my-planner`. Tự động bỏ qua research khi KNOWLEDGE.md đầy đủ. Xác minh với `my-plan-checker` (1 lần). |
 | `/my-implement <phase>` | Thực thi PLAN.md theo từng wave song song qua các agent `my-executor`. Per-task commits + plan metadata commits. |
 | `/my-evaluate <phase> [--quick\|--full]` | Đánh giá mô hình so với mục tiêu trong CONTEXT.md → EVALUATION.md với quyết định go/no-go. |
+
+### Tài Liệu
+
+| Lệnh | Mô tả |
+|------|-------|
+| `/my-doc --phase <N>` | Tạo tài liệu user-centric từng bước cho phase vừa hoàn thành. Chạy sau `/my-evaluate N` với kết quả GO. Output: `{docs_dir}/{version}/{N}-{tên-phase}.md` |
+| `/my-doc --release` | Hoàn thiện tài liệu version: trang index + cập nhật CHANGELOG. Chạy tự động khi `/my-release-version`. |
+| `/my-doc --all` | Tạo lại tài liệu cho tất cả phases đã hoàn thành. |
 
 ### Debug & Điều Hướng
 
@@ -289,35 +298,59 @@ Các agent được gán model dựa trên profile đang hoạt động. Một s
 
 ## Cấu Trúc `.note/`
 
+Mỗi version có thư mục riêng. Tất cả planning artifacts được phân tách theo version để truy vết đầy đủ.
+
 ```
 .note/
-├── PROJECT.md              # Task, dataset, metrics mục tiêu, compute
-├── ROADMAP.md              # Các phase với mục tiêu
-├── STATE.md                # Trạng thái dự án — phase hiện tại, metric tốt nhất
-├── KNOWLEDGE.md            # Papers, code refs, insights chính (xây dựng trong /my-discuss)
-├── DATA-PIPELINE.md        # Pipeline dữ liệu (nếu đã chạy)
-├── VERSION-REPORT.md       # Tóm tắt version cuối (sau khi release)
-├── research/
-│   └── {slug}-RESEARCH.md
-├── reports/
-│   ├── session-{date}.md
-│   ├── experiments-{date}.md
-│   └── version-{v}-{date}.md
-├── codebase/               # Bản đồ codebase (nếu đã map)
-│   ├── STACK.md
-│   ├── ARCHITECTURE.md
-│   └── ...
-├── debug/
-│   └── resolved/
-└── phases/
-    └── 01-{tên}/
-        ├── 01-CONTEXT.md
-        ├── 01-DISCUSSION-LOG.md
-        ├── 01-01-PLAN.md
-        ├── 01-01-SUMMARY.md
-        ├── EVALUATION.md
-        └── QUANTIZATION-REPORT.md
+├── config.json             # Config dùng chung: current_version, docs_dir, model profile, v.v.
+│
+├── v1.0/                   # Version cũ — context được giữ lại để tra cứu
+│   ├── PROJECT.md          # Mô tả dự án
+│   ├── REQUIREMENTS.md     # Yêu cầu với ID và traceability
+│   ├── ROADMAP.md          # Các phase và mục tiêu
+│   ├── KNOWLEDGE.md        # Papers, tham chiếu, insights
+│   ├── VERSION-SUMMARY.md  # Tóm tắt release
+│   └── phases/
+│       └── 01-{tên}/
+│           ├── 01-CONTEXT.md          # Quyết định đã chốt (giữ mãi)
+│           ├── 01-DISCUSSION-LOG.md   # Nhật ký kiểm toán (giữ mãi)
+│           └── EVALUATION.md          # Metrics đạt được (giữ mãi)
+│
+└── v1.1/                   # Version hiện tại đang làm việc
+    ├── PROJECT.md
+    ├── REQUIREMENTS.md
+    ├── ROADMAP.md
+    ├── STATE.md             # Phase hiện tại, metric tốt nhất, blockers
+    ├── KNOWLEDGE.md
+    └── phases/
+        └── 01-{tên}/
+            ├── 01-CONTEXT.md
+            ├── 01-DISCUSSION-LOG.md
+            ├── 01-01-PLAN.md          # Xóa khi release (intermediate)
+            ├── 01-01-SUMMARY.md       # Xóa khi release (intermediate)
+            └── EVALUATION.md
 ```
+
+**Sau khi release:** PLAN.md và SUMMARY.md được dọn sạch. Tất cả context files (CONTEXT.md, DISCUSSION-LOG.md, EVALUATION.md, KNOWLEDGE.md, REQUIREMENTS.md) được giữ lại vĩnh viễn để truy vết.
+
+## Cấu Trúc `docs/`
+
+Được tạo bởi `/my-doc`, lưu trong thư mục cấu hình `docs_dir` (mặc định: `docs/`):
+
+```
+docs/
+├── CHANGELOG.md            # Lịch sử thay đổi qua các version
+├── v1.0/
+│   ├── index.md            # Tổng quan version + hướng dẫn nhanh
+│   ├── 01-data-pipeline.md # Hướng dẫn từng bước cho phase
+│   ├── 02-model.md
+│   └── ...
+└── v1.1/
+    ├── index.md
+    └── 01-detection.md     # Thêm dần sau mỗi phase GO
+```
+
+Mỗi tài liệu là Markdown sạch, format tương thích XWiki. Copy `docs/{version}/` vào XWiki space của bạn.
 
 ---
 

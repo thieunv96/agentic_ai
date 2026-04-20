@@ -14,6 +14,7 @@ Model profiles control which the agent model each AI agent uses. This allows bal
 | my-research-synthesizer | sonnet | sonnet | haiku | inherit |
 | my-debugger | claude-opus-4-7 | claude-opus-4-7 | claude-opus-4-7 | inherit |
 | my-quantizer | claude-opus-4-7 | claude-opus-4-7 | claude-opus-4-7 | inherit |
+| my-documenter | sonnet | sonnet | sonnet | inherit |
 | my-codebase-mapper | sonnet | haiku | haiku | inherit |
 | ai-verifier | sonnet | sonnet | haiku | inherit |
 | my-plan-checker | sonnet | sonnet | haiku | inherit |

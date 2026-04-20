@@ -28,15 +28,16 @@ ai/  →  deploy to  →  .github/
 ## Core Workflow
 
 ```
-/my-new-version          → Initialize version: PROJECT.md + ROADMAP.md  [COMMIT]
+/my-new-version          → Initialize version: .note/vX.Y/ + ROADMAP.md  [COMMIT]
 /my-discuss <phase>      → Gather context + lock decisions → KNOWLEDGE.md + CONTEXT.md  [COMMIT]
 /my-plan <phase>         → Create detailed phase plan → PLAN.md files
 /my-implement <phase>    → Execute plan → code + per-task commits  [COMMITS]
 /my-evaluate <phase>     → Evaluate metrics vs targets → EVALUATION.md
+/my-doc [--phase N|--release] → Generate user-centric docs for XWiki sync
 /my-debug [issue]        → Systematic debugging with persistent state
 /my-status               → Current project status and next action
 /my-continue             → Resume from last checkpoint
-/my-release-version <v>  → Close version with summary + git tag  [COMMIT]
+/my-release-version <v>  → Clean up intermediates, finalize docs, tag release  [COMMIT]
 ```
 
 ---
@@ -221,8 +222,8 @@ Agents are assigned models based on the active profile. Some agents are **pinned
 
 | Command | Description |
 |---------|-------------|
-| `/my-new-version` | Start a new version or milestone. Creates `.note/` structure, PROJECT.md, STATE.md, ROADMAP.md via `my-roadmapper`. |
-| `/my-release-version <v>` | Close version with VERSION-SUMMARY.md, git tag, and archived planning artifacts. |
+| `/my-new-version` | Start a new version. Creates `.note/{version}/` with PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md. Sets `current_version` in config. |
+| `/my-release-version <v>` | Verify phases, generate release docs, clean up intermediate artifacts (PLAN/SUMMARY), tag release. Context files kept for traceback. |
 
 ### Phase Loop
 
@@ -232,6 +233,14 @@ Agents are assigned models based on the active profile. Some agents are **pinned
 | `/my-plan <phase>` | Generate PLAN.md files via `my-planner` agent. Auto-skips research when KNOWLEDGE.md is comprehensive. Verifies with `my-plan-checker` (1 pass). |
 | `/my-implement <phase>` | Execute PLAN.md wave-by-wave via parallel `my-executor` agents. Per-task commits + plan metadata commits. |
 | `/my-evaluate <phase> [--quick\|--full]` | Evaluate model vs CONTEXT.md targets → EVALUATION.md with go/no-go decision. |
+
+### Documentation
+
+| Command | Description |
+|---------|-------------|
+| `/my-doc --phase <N>` | Generate user-centric step-by-step docs for a completed phase. Run after `/my-evaluate N` with GO result. Output: `{docs_dir}/{version}/{N}-{phase-name}.md` |
+| `/my-doc --release` | Finalize version documentation: index page + CHANGELOG update. Run automatically at `/my-release-version`. |
+| `/my-doc --all` | Regenerate docs for all completed phases (useful after bulk changes). |
 
 ### Debugging & Navigation
 
@@ -289,35 +298,59 @@ Agents are assigned models based on the active profile. Some agents are **pinned
 
 ## `.note/` Structure
 
+Each version gets its own subdirectory. All planning artifacts are version-scoped for full traceability.
+
 ```
 .note/
-├── PROJECT.md              # Task, dataset, target metrics, compute
-├── ROADMAP.md              # Phase breakdown with goals
-├── STATE.md                # Project memory — current phase, best metric
-├── KNOWLEDGE.md            # Papers, code refs, key insights (built in /my-discuss)
-├── DATA-PIPELINE.md        # Data preparation pipeline (if run)
-├── VERSION-REPORT.md       # Final version summary (after release)
-├── research/
-│   └── {slug}-RESEARCH.md
-├── reports/
-│   ├── session-{date}.md
-│   ├── experiments-{date}.md
-│   └── version-{v}-{date}.md
-├── codebase/               # Codebase map (if mapped)
-│   ├── STACK.md
-│   ├── ARCHITECTURE.md
-│   └── ...
-├── debug/
-│   └── resolved/
-└── phases/
-    └── 01-{name}/
-        ├── 01-CONTEXT.md
-        ├── 01-DISCUSSION-LOG.md
-        ├── 01-01-PLAN.md
-        ├── 01-01-SUMMARY.md
-        ├── EVALUATION.md
-        └── QUANTIZATION-REPORT.md
+├── config.json             # Shared config: current_version, docs_dir, model profile, etc.
+│
+├── v1.0/                   # Previous version — context preserved for traceback
+│   ├── PROJECT.md          # What was built and why
+│   ├── REQUIREMENTS.md     # Requirement IDs and traceability
+│   ├── ROADMAP.md          # Phase breakdown
+│   ├── KNOWLEDGE.md        # Papers, references, key insights
+│   ├── VERSION-SUMMARY.md  # Release summary
+│   └── phases/
+│       └── 01-{name}/
+│           ├── 01-CONTEXT.md          # Locked decisions (kept forever)
+│           ├── 01-DISCUSSION-LOG.md   # Audit trail (kept forever)
+│           └── EVALUATION.md          # Metrics achieved (kept forever)
+│
+└── v1.1/                   # Current active version
+    ├── PROJECT.md
+    ├── REQUIREMENTS.md
+    ├── ROADMAP.md
+    ├── STATE.md             # Current phase, best metric, blockers
+    ├── KNOWLEDGE.md
+    └── phases/
+        └── 01-{name}/
+            ├── 01-CONTEXT.md
+            ├── 01-DISCUSSION-LOG.md
+            ├── 01-01-PLAN.md          # Removed at release (intermediate)
+            ├── 01-01-SUMMARY.md       # Removed at release (intermediate)
+            └── EVALUATION.md
 ```
+
+**After release:** PLAN.md and SUMMARY.md are cleaned up. All context files (CONTEXT.md, DISCUSSION-LOG.md, EVALUATION.md, KNOWLEDGE.md, REQUIREMENTS.md) are kept permanently for traceback.
+
+## `docs/` Structure
+
+Generated by `/my-doc`, stored in configurable `docs_dir` (default: `docs/`):
+
+```
+docs/
+├── CHANGELOG.md            # Cross-version changes
+├── v1.0/
+│   ├── index.md            # Version overview + quick start
+│   ├── 01-data-pipeline.md # Step-by-step phase guide
+│   ├── 02-model.md
+│   └── ...
+└── v1.1/
+    ├── index.md
+    └── 01-detection.md     # Added incrementally after each phase GO
+```
+
+Each doc is clean Markdown formatted for XWiki sync. Copy `docs/{version}/` to your XWiki space.
 
 ---
 

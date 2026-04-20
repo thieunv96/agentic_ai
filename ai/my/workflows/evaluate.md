@@ -15,13 +15,15 @@ Read: STATE.md, PROJECT.md, {N}-CONTEXT.md, all PLAN.md + SUMMARY.md in phase.
 
 ## 2. Spawn my-evaluator
 
+Read `phase_dir` from INIT result (already version-scoped, e.g. `.note/v1.2/phases/01-name/`).
+
 ```
 <files_to_read>
-.note/PROJECT.md
-.note/KNOWLEDGE.md
-.note/phases/[phase-dir]/[N]-CONTEXT.md
-.note/phases/[phase-dir]/*/PLAN.md
-.note/phases/[phase-dir]/*/SUMMARY.md
+[planning]/PROJECT.md
+[planning]/KNOWLEDGE.md
+[phase_dir]/[N]-CONTEXT.md
+[phase_dir]/*-PLAN.md
+[phase_dir]/*-SUMMARY.md
 </files_to_read>
 
 Task: Evaluate Phase [N] — [phase name].
@@ -56,9 +58,15 @@ If GO:
 ---
 ## ▶ Next Up
 
-**Phase [N+1]: [Name]** — [Goal]
+**Document Phase [N]** (recommended — user-centric docs for this phase)
+
+`/my-doc --phase [N]`
+
+**Or skip to next phase:**
 
 `/my-discuss [N+1]`
+
+<sub>`/clear` first → fresh context window</sub>
 
 ---
 ```

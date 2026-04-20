@@ -4,26 +4,64 @@ Configuration options for `.note/` directory behavior.
 
 <config_schema>
 ```json
-"planning": {
-  "commit_docs": true,
-  "search_gitignored": false
-},
-"git": {
-  "branching_strategy": "none",
-  "phase_branch_template": "ai/phase-{phase}-{slug}",
-  "milestone_branch_template": "ai/{milestone}-{slug}",
-  "quick_branch_template": null
+{
+  "current_version": "v1.2",
+  "docs_dir": "docs",
+  "planning": {
+    "commit_docs": true,
+    "search_gitignored": false
+  },
+  "git": {
+    "branching_strategy": "none",
+    "phase_branch_template": "ai/phase-{phase}-{slug}",
+    "milestone_branch_template": "ai/{milestone}-{slug}",
+    "quick_branch_template": null
+  }
 }
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
+| `current_version` | `null` | Active version slug (e.g. `"v1.2"`). When set, all `.note/` paths resolve to `.note/v1.2/`. Set automatically by `/my-new-version`, cleared at release. |
+| `docs_dir` | `"docs"` | Output directory for `/my-doc` generated documentation. Can be absolute or relative to project root. |
 | `commit_docs` | `true` | Whether to commit planning artifacts to git |
 | `search_gitignored` | `false` | Add `--no-ignore` to broad rg searches |
 | `git.branching_strategy` | `"none"` | Git branching approach: `"none"`, `"phase"`, or `"milestone"` |
 | `git.phase_branch_template` | `"ai/phase-{phase}-{slug}"` | Branch template for phase strategy |
 | `git.milestone_branch_template` | `"ai/{milestone}-{slug}"` | Branch template for milestone strategy |
 | `git.quick_branch_template` | `null` | Optional branch template for quick-task runs |
+
+**Versioned `.note/` structure:**
+
+When `current_version` is set, the CLI and all workflows scope their paths to `.note/{version}/`:
+```
+.note/
+├── config.json          ← root, version-agnostic
+├── v1.1/                ← previous version (archived context)
+│   ├── PROJECT.md
+│   ├── REQUIREMENTS.md
+│   ├── ROADMAP.md
+│   ├── KNOWLEDGE.md
+│   ├── VERSION-SUMMARY.md
+│   └── phases/
+│       └── 01-name/
+│           ├── 01-CONTEXT.md       ← kept (traceback)
+│           ├── 01-DISCUSSION-LOG.md ← kept (traceback)
+│           └── EVALUATION.md       ← kept (traceback)
+└── v1.2/                ← current active version
+    ├── PROJECT.md
+    ├── REQUIREMENTS.md
+    ├── ROADMAP.md
+    ├── STATE.md
+    ├── KNOWLEDGE.md
+    └── phases/
+        └── 01-detection/
+            ├── 01-CONTEXT.md
+            ├── 01-DISCUSSION-LOG.md
+            ├── 01-01-PLAN.md       ← removed at release
+            ├── 01-01-SUMMARY.md    ← removed at release
+            └── EVALUATION.md
+```
 </config_schema>
 
 <commit_docs_behavior>
