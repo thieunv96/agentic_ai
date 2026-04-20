@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # AI/ML Framework Installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
+# Or:    bash <(curl -fsSL https://github.com/thieunv96/agentic_ai/raw/main/install.sh)
 
 set -euo pipefail
 
 REPO="thieunv96/agentic_ai"
 BRANCH="main"
 ARCHIVE_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
+CLONE_URL="https://github.com/${REPO}.git"
 TARGET_DIR=".github"
 
 # Colors
@@ -22,9 +24,7 @@ warn()    { echo -e "${YELLOW}[ai]${NC} $*"; }
 error()   { echo -e "${RED}[ai]${NC} $*" >&2; exit 1; }
 
 # Check for required tools
-for cmd in curl tar; do
-  command -v "$cmd" >/dev/null 2>&1 || error "Required tool not found: $cmd"
-done
+command -v tar >/dev/null 2>&1 || error "Required tool not found: tar"
 
 # Determine install destination
 if [ -n "${1:-}" ]; then
@@ -37,18 +37,39 @@ info "Installing AI/ML framework into ${TARGET_DIR}/ ..."
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-# Download archive
-info "Downloading from ${REPO}..."
-if ! curl -fsSL "$ARCHIVE_URL" -o "$TMP/archive.tar.gz"; then
-  error "Download failed. Check your internet connection or repository URL."
+# Try method 1: curl archive download
+DOWNLOADED=false
+if command -v curl >/dev/null 2>&1; then
+  info "Downloading archive from github.com ..."
+  if curl -fsSL "$ARCHIVE_URL" -o "$TMP/archive.tar.gz" 2>/dev/null; then
+    tar -xz -C "$TMP" --strip-components=1 -f "$TMP/archive.tar.gz" 2>/dev/null && DOWNLOADED=true
+  fi
 fi
 
-# Extract — strip the top-level repo directory
-tar -xz -C "$TMP" --strip-components=1 -f "$TMP/archive.tar.gz"
+# Try method 2: wget archive download
+if [ "$DOWNLOADED" = false ] && command -v wget >/dev/null 2>&1; then
+  info "Trying wget ..."
+  if wget -q "$ARCHIVE_URL" -O "$TMP/archive.tar.gz" 2>/dev/null; then
+    tar -xz -C "$TMP" --strip-components=1 -f "$TMP/archive.tar.gz" 2>/dev/null && DOWNLOADED=true
+  fi
+fi
 
-# Verify ai/ directory exists in archive
+# Try method 3: git clone (most compatible, works even if raw.githubusercontent.com is blocked)
+if [ "$DOWNLOADED" = false ] && command -v git >/dev/null 2>&1; then
+  warn "Archive download failed — falling back to git clone ..."
+  if git clone --depth=1 "$CLONE_URL" "$TMP/repo" 2>/dev/null; then
+    cp -r "$TMP/repo/"* "$TMP/"
+    DOWNLOADED=true
+  fi
+fi
+
+if [ "$DOWNLOADED" = false ]; then
+  error "All download methods failed. Ensure git, curl, or wget is available and github.com is accessible."
+fi
+
+# Verify ai/ directory exists
 if [ ! -d "$TMP/ai" ]; then
-  error "Expected 'ai/' directory not found in archive. Repository structure may have changed."
+  error "Expected 'ai/' directory not found. Repository structure may have changed."
 fi
 
 # Read version
@@ -57,10 +78,8 @@ if [ -f "$TMP/ai/my/VERSION" ]; then
   VERSION=$(cat "$TMP/ai/my/VERSION")
 fi
 
-# Create target directory
+# Create target directory and copy
 mkdir -p "$TARGET_DIR"
-
-# Copy framework files
 cp -r "$TMP/ai/"* "$TARGET_DIR/"
 
 # Verify installation

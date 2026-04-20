@@ -24,6 +24,20 @@ ai/  →  deploy to  →  .github/
 curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
 ```
 
+If `raw.githubusercontent.com` is blocked on your network, use the `github.com` URL directly:
+
+```bash
+bash <(curl -fsSL https://github.com/thieunv96/agentic_ai/raw/main/install.sh)
+```
+
+Or use `git clone` (works on all networks that can reach github.com):
+
+```bash
+git clone --depth=1 https://github.com/thieunv96/agentic_ai.git /tmp/_ai_install && \
+  mkdir -p .github && cp -r /tmp/_ai_install/ai/* .github/ && \
+  rm -rf /tmp/_ai_install && echo "Done."
+```
+
 **Windows (PowerShell):**
 
 ```powershell
@@ -36,7 +50,7 @@ irm https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.ps1 | ie
 curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash -s -- my-custom-dir
 ```
 
-The installer downloads the latest framework, creates the target directory if needed, and copies all `ai/` contents into it. No dependencies required beyond `curl` and `tar` (standard on all systems).
+The installer auto-detects available tools (`curl` → `wget` → `git clone`) and falls back gracefully if one method is unavailable.
 
 ---
 
