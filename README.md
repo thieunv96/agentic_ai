@@ -16,9 +16,33 @@ ai/  →  deploy to  →  .github/
 
 ---
 
+## Installation
+
+**macOS / Linux** — one command, installs into `.github/` of the current project:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.ps1 | iex
+```
+
+**Custom target directory** (if you don't want `.github/`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash -s -- my-custom-dir
+```
+
+The installer downloads the latest framework, creates the target directory if needed, and copies all `ai/` contents into it. No dependencies required beyond `curl` and `tar` (standard on all systems).
+
+---
+
 ## Quick Start
 
-1. Copy `ai/` contents into `.github/` of your ML project
+1. Run the installer above in your ML project root
 2. Start a new version: `/my-new-version`
 3. Discuss first phase (context gathering is built-in): `/my-discuss 1`
 4. Follow the phase loop: discuss → plan → implement → evaluate

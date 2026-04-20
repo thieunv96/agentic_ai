@@ -16,9 +16,33 @@ ai/  →  triển khai vào  →  .github/
 
 ---
 
+## Cài Đặt
+
+**macOS / Linux** — một lệnh duy nhất, cài vào `.github/` của project hiện tại:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.ps1 | iex
+```
+
+**Chỉ định thư mục tùy chỉnh** (nếu không muốn dùng `.github/`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash -s -- my-custom-dir
+```
+
+Installer tự động tải framework mới nhất, tạo thư mục đích nếu chưa có, và sao chép toàn bộ nội dung `ai/` vào đó. Không cần cài thêm gì — chỉ cần `curl` và `tar` (có sẵn trên mọi hệ thống).
+
+---
+
 ## Bắt Đầu Nhanh
 
-1. Sao chép nội dung `ai/` vào `.github/` của dự án ML
+1. Chạy lệnh cài đặt ở trên tại thư mục gốc của project ML
 2. Khởi tạo version mới: `/my-new-version`
 3. Thảo luận phase đầu tiên (thu thập context đã tích hợp sẵn): `/my-discuss 1`
 4. Theo vòng lặp phase: discuss → plan → implement → evaluate
