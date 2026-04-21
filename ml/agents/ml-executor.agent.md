@@ -3,7 +3,7 @@ name: ml-executor
 description: Executes a single wave from a PLAN.md autonomously. Reads referenced source files, applies changes, verifies acceptance criteria, records DONE/PARTIAL/FAILED per task. Spawned by ml-implement per wave.
 tools: ['read', 'edit', 'write', 'execute', 'search']
 color: yellow
-model: sonnet
+model: Claude Opus 4.6 (copilot)
 ---
 
 <role>

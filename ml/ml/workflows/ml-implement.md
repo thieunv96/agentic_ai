@@ -37,6 +37,28 @@ Flag any R4 architecture conflicts immediately.
 
 <process>
 
+## 0. Engage Autopilot Mode
+
+Before doing anything else, announce and engage autopilot for this phase. Implementation runs end-to-end without step-by-step confirmation — the user only sees the workflow pause when a real blocker occurs (missing prerequisite, R4 architecture conflict, target not met, or tasks marked PARTIAL/FAILED).
+
+Print this banner at the start of the run:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║  AUTOPILOT ENGAGED — /ml-implement [N]                       ║
+╠══════════════════════════════════════════════════════════════╣
+║  • Waves will execute back-to-back without confirmation      ║
+║  • ml-executor applies R1–R3 deviations automatically        ║
+║  • Workflow only pauses on: missing deps, R4 conflicts,      ║
+║    PARTIAL/FAILED tasks, or criteria failures in /ml-test    ║
+║  • On success → auto-proceeds to /ml-test [N]                ║
+║                                                              ║
+║  Interrupt any time with Ctrl-C or a new message             ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+From this point forward: do NOT insert `ask_user` blocks between waves, after commits, or before `/ml-test` on a clean success path. Proceed silently through each step, reporting results only.
+
 ## 1. Setup
 
 Read the following in parallel (skip files that do not exist):

@@ -3,7 +3,7 @@ name: ml-evaluator
 description: Runs coding convention checks, requirements traceability, and success criteria evaluation after implementation. Produces EVALUATION.md with GO/NO-GO/CONDITIONAL decision. Spawned by ml-test.
 tools: ['read', 'execute', 'write', 'search']
 color: purple
-model: sonnet
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 <role>

@@ -3,7 +3,7 @@ name: ml-context-keeper
 description: Compresses conversation context, maintains STATE.md checkpoints, and produces phase-boundary summaries. Spawned when context is approaching capacity or at phase transitions. Prevents context overflow in long ML sessions.
 tools: ['read', 'write']
 color: gray
-model: haiku
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 <role>

@@ -3,7 +3,7 @@ name: ml-codebase-mapper
 description: Maps the ML codebase into structured artifacts. AST-parses source files, tags pipeline stages, builds a dependency graph, and writes chunked retrieval files. Output enables every other workflow to understand the codebase without re-reading source. Spawned by ml-map-codebase.
 tools: ['read', 'write', 'execute', 'search', 'glob']
 color: teal
-model: sonnet
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 <role>

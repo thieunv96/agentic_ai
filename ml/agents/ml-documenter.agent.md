@@ -3,7 +3,7 @@ name: ml-documenter
 description: Generates user-centric, XWiki-ready documentation for a completed ML/AI phase. Reads planning artifacts and translates them into clear, copy-pasteable docs. Spawned by ml-doc.
 tools: ['read', 'write']
 color: green
-model: sonnet
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 <role>

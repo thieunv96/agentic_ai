@@ -126,7 +126,66 @@ ask_user:
     - "Other — I'll describe"
 ```
 
-## 5. Build the Plan
+## 5. Optional Research Before Planning
+
+Before building the plan, offer research. This is the last cheap moment to validate architecture/approach assumptions — a bad assumption caught here costs minutes; caught during implement it costs hours.
+
+Skip this step automatically if:
+- A recent `## Research: [date] — ...` section exists in `.works/[v]/KNOWLEDGE.md` that covers the same architecture/approach for this phase (within the last 14 days)
+- `/ml-discuss [N]` already ran research for this phase (check CONTEXT.md for a "Research informed by" note)
+
+Otherwise ask:
+
+```
+ask_user:
+  context: |
+    About to build the plan for Phase [N]: [phase-name].
+    Key approach assumptions from CONTEXT.md (or inferred):
+      • [architecture / technique 1]
+      • [architecture / technique 2]
+  why: |
+    Research now validates architecture/technique choices before they get baked
+    into waves and tasks. Skipping is fine when the approach is well-trodden;
+    research pays off when there are recent SOTA shifts or unproven combinations.
+  question: "Run research before building the plan?"
+  recommendation: "[Skip / Quick / Deep] — [one-line reasoning based on how novel or risky the approach looks]"
+  choices:
+    - "Skip — approach is well-understood, build the plan now"
+    - "Quick — scan for recent SOTA / known pitfalls (5–10 min)"
+    - "Deep — full survey of architectures, benchmarks, reference implementations (20–30 min)"
+    - "Other — I'll specify a narrower research question"
+```
+
+If Quick or Deep: spawn **ml-researcher** with the specific research question.
+
+```
+<files_to_read>
+- .works/[v]/[N]-CONTEXT.md
+- .works/[v]/KNOWLEDGE.md
+- REQUIREMENTS.md
+</files_to_read>
+Research question: [question tied to the riskiest approach assumption for Phase N].
+Depth: [Quick / Deep]
+Return: findings that would change wave structure, technique choice, or acceptance criteria.
+```
+
+After the agent returns:
+1. Surface 2–4 key findings inline (Confirmed / Challenged / New constraint / Recommended).
+2. If any finding **challenges** a CONTEXT.md decision, pause and ask before continuing:
+
+```
+ask_user:
+  question: "Research challenged [specific assumption]. How to handle?"
+  choices:
+    - "Update CONTEXT.md with the new decision, then plan"
+    - "Note it as a risk in the plan but keep the original decision"
+    - "Go back to /ml-discuss [N] to re-lock requirements"
+    - "Other — I'll describe"
+```
+
+3. If findings **confirm** the approach: proceed to Step 6 with no interruption.
+
+## 6. Build the Plan
 
 Using all collected context, generate a structured plan:
 
@@ -200,7 +259,7 @@ Using all collected context, generate a structured plan:
 - Wave 2: Serving setup (vLLM / TGI) — throughput and latency benchmark
 - Wave 3: Continuous batching tuning, KV cache profiling, cost estimate
 
-## 6. Validate the Plan — Spawn ml-rubber-duck
+## 7. Validate the Plan — Spawn ml-rubber-duck
 
 Before showing the plan to the user, spawn the **ml-rubber-duck** agent:
 
@@ -215,7 +274,7 @@ Review this plan. Return: blockers (vague tasks, missing acceptance criteria, hi
 
 Apply feedback that prevents real execution failures. Discard feedback that expands scope or over-engineers.
 
-## 7. Present & Adjust
+## 8. Present & Adjust
 
 Show the full plan, then ask:
 
@@ -233,7 +292,7 @@ ask_user:
 
 Iterate until the user confirms. No cap on adjustment rounds.
 
-## 8. Save the Plan
+## 9. Save the Plan
 
 Save the plan to: `.works/[v]/[N]-PLAN.md`
 
@@ -241,7 +300,7 @@ The PLAN.md is the primary artifact. No SQL or external tracking needed.
 
 Do **not** commit at this stage — per commit discipline (only commit at phase implement complete and phase docs complete).
 
-## 9. Offer Next Step
+## 10. Offer Next Step
 
 ```
 ---

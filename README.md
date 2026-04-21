@@ -1,425 +1,451 @@
-# My ML/AI Framework
+# ML Framework — AI-Assisted ML Development Lifecycle
 
-A personal, modular AI-assisted development framework for **Computer Vision** and **Vision-Language Model (VLM)** projects.
-
-> 🇻🇳 [Đọc bằng tiếng Việt](README.VN.md)
+An opinionated workflow framework for AI/ML projects that runs inside **Claude Code** (or any AI coding assistant that supports custom instructions). It turns a single command into a structured, multi-stage pipeline — from surfacing real painpoints through planning, implementation, testing, documentation, and reporting.
 
 ---
 
-## Overview
+## What This Is
 
-This framework provides a structured, opinionated workflow for ML/AI model development — from idea and research all the way through training, evaluation, quantization, and release. It deploys to `.github/` in any ML project and integrates directly with GitHub Copilot.
+A set of workflow files, sub-agents, and a skill that Claude loads when you type `/ml-*` commands. Each command maps to one stage of the ML development lifecycle. The stages are connected — outputs from one stage become inputs for the next, stored in `.works/[version]/`.
+
+**Pipeline overview:**
 
 ```
-ai/  →  deploy to  →  .github/
+/ml-map-codebase          ← understand what already exists
+       ↓
+/ml-discuss [N]           ← surface real painpoints → lock requirements
+       ↓
+/ml-plan [N]              ← optional research → break into waves and tasks
+       ↓
+/ml-implement [N]         ← AUTOPILOT: execute all waves → COMMIT → auto-test
+       ↓
+/ml-test [N]              ← validate → GO/NO-GO → auto-docs
+       ↓
+/ml-doc [N]               ← generate user docs → COMMIT → auto-report
+       ↓
+/ml-report                ← consolidate results → next step recommendations
 ```
+
+`/ml-implement`, `/ml-test`, and `/ml-doc` run in **autopilot mode** — no confirmation between steps. The pipeline only pauses when something needs your judgment: targets not met, a blocker found, or a gap in the implementation.
 
 ---
 
 ## Installation
 
-**macOS / Linux** — one command, installs into `.github/` of the current project:
-
 ```bash
+# Into the current project (installs to .github/)
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
+
+# Or explicitly
+bash <(curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh)
+
+# Install to a custom directory
+curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash -s -- .my-ai
+
+# Re-install / update
 curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash
 ```
 
-If `raw.githubusercontent.com` is blocked on your network, use the `github.com` URL directly:
+After installation, open your project in **Claude Code** — the `.github/` directory is automatically loaded as custom instructions.
 
-```bash
-bash <(curl -fsSL https://github.com/thieunv96/agentic_ai/raw/main/install.sh)
-```
+**Requirements:** `bash`, `curl` or `wget` or `git`.
 
-Or use `git clone` (works on all networks that can reach github.com):
+### How commands work
 
-```bash
-git clone --depth=1 https://github.com/thieunv96/agentic_ai.git /tmp/_ai_install && \
-  mkdir -p .github && cp -r /tmp/_ai_install/ai/* .github/ && \
-  rm -rf /tmp/_ai_install && echo "Done."
-```
+This framework does **not** require a plugin or CLI extension. When you type `/ml-plan 2` in Claude Code (or any AI assistant that loaded `.github/copilot-instructions.md`), the assistant reads the command-to-file mapping in those instructions and opens the correct workflow file. All intelligence lives in the workflow files — no server, no binary, no shell alias needed.
 
-**Windows (PowerShell):**
-
-```powershell
-irm https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.ps1 | iex
-```
-
-**Custom target directory** (if you don't want `.github/`):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/thieunv96/agentic_ai/main/install.sh | bash -s -- my-custom-dir
-```
-
-The installer auto-detects available tools (`curl` → `wget` → `git clone`) and falls back gracefully if one method is unavailable.
+If a command returns "no command found," the instructions file is not loaded. Verify that `.github/copilot-instructions.md` exists and that your AI assistant is configured to read it (Claude Code does this automatically).
 
 ---
 
-## Quick Start
+## Commands Reference
 
-1. Run the installer above in your ML project root
-2. Start a new version: `/my-new-version`
-3. Discuss first phase (context gathering is built-in): `/my-discuss 1`
-4. Follow the phase loop: discuss → plan → implement → evaluate
+### `/ml-map-codebase`
+
+Maps your ML codebase into structured artifacts that every other command uses instead of re-reading source files.
+
+```bash
+/ml-map-codebase           # Full map (first time or after major refactor)
+/ml-map-codebase --update  # Re-map only files changed since last run
+/ml-map-codebase --component model  # Map one pipeline stage only
+```
+
+**Output — `.works/[version]/codebase/`:**
+
+| File | Contents |
+|------|----------|
+| `MANIFEST.md` | Pipeline ASCII tree, entry points, key component table |
+| `COMPONENTS.md` | Datasets, models, losses, metrics — with forward signatures |
+| `DEPENDENCIES.md` | config→train, data→training, model→inference linkages |
+| `RETRIEVAL-INDEX.md` | "how is loss computed?" → `chunks/utils.losses.focal_loss.md` |
+| `chunks/[module].[fn].md` | One chunk per function/class — used by agents instead of full source |
+
+**Run this first** before starting a new version. Every other command is faster and more accurate when the map exists.
 
 ---
 
-## Core Workflow
+### `/ml-discuss [N]`
+
+Deep-dive discussion to surface real painpoints and lock requirements before planning. Produces `[N]-CONTEXT.md`.
+
+```bash
+/ml-discuss 1    # Discuss phase 1
+/ml-discuss      # Discuss, will ask which phase
+```
+
+**What it does:**
+
+1. Asks which version and issue type (Work item / Bug / Version planning / Research spike)
+2. Asks 5 deep-dive questions specific to the issue type — surfaces painpoints, constraints, done criteria, risks
+3. Optionally spawns **ml-researcher** (Deep Research Agent) to validate assumptions before locking requirements
+4. Presents recommendations and alternative approaches
+5. Locks requirements into `[N]-CONTEXT.md`
+
+**Key questions asked (Work item example):**
+- What problem does a user face *today* without this feature?
+- What has already been tried, and why did it fall short?
+- How will you know this is done? (measurable criterion)
+- What are the hard constraints? (latency / memory / dataset / framework)
+- What is the riskiest assumption?
+
+**Output:** `.works/[version]/[N]-CONTEXT.md`
+
+---
+
+### `/ml-plan [N]`
+
+Creates a detailed, wave-structured implementation plan from the locked requirements. Includes an optional research pass before the plan is finalized.
+
+```bash
+/ml-plan 1    # Plan phase 1 (reads 1-CONTEXT.md automatically)
+```
+
+**What it does:**
+
+1. Reads `[N]-CONTEXT.md` if it exists — skips re-asking context questions
+2. Clarifies compute environment and primary constraint
+3. **Optional research step** — offers Skip / Quick / Deep before building the plan. Spawns **ml-researcher** if chosen; findings that challenge a locked decision pause for your judgment before continuing.
+4. Builds a wave-structured plan with tasks, outputs, and acceptance criteria
+5. Spawns **ml-rubber-duck** agent to validate task clarity before showing you
+6. Presents the plan for adjustment — no cap on rounds
+
+**Plan structure:**
+
+```markdown
+# Plan: Phase 1 — Data Pipeline
+
+## Objective
+## Success Criteria
+## Work Breakdown
+  ### Wave 1: Setup & inventory
+  ### Wave 2: Quality filtering
+  ### Wave 3: Tokenization & stats
+## Risks
+## Dependencies
+```
+
+**Output:** `.works/[version]/[N]-PLAN.md`
+
+**Note:** Does not commit. Planning is exploratory.
+
+---
+
+### `/ml-implement [N]`
+
+Executes the plan wave by wave in **autopilot mode** — no confirmation between tasks or waves. Proceeds automatically to `/ml-test` on success.
+
+```bash
+/ml-implement 1            # Execute all waves
+/ml-implement 1 --wave 2   # Execute only Wave 2
+/ml-implement 1 --gaps-only  # Re-run PARTIAL and FAILED tasks only
+```
+
+**What it does:**
+
+0. **Engages autopilot mode** — prints a banner and runs end-to-end without interruption on the clean-success path
+1. Validates CONTEXT.md and PLAN.md exist — aborts with clear error if missing
+2. Spawns **ml-executor** agent per wave (keeps main context clean)
+3. Each task: reads files → applies change → verifies acceptance criteria → one auto-fix attempt → records DONE/PARTIAL/FAILED
+4. Applies deviation rules automatically:
+   - R1: Fix bugs that block the current task
+   - R2: Add missing imports/dependencies
+   - R3: Fix typos in file paths/function names
+   - R4: **STOP** if a change conflicts with a locked decision — surfaces to you
+5. Writes `[N]-SUMMARY.md` with full task status table
+6. **Commits:** `feat(phase-N): implement [phase-name]`
+7. **Auto-proceeds to `/ml-test [N]`** if all tasks DONE; pauses for gaps
+
+**Pauses only when:**
+- Pre-conditions missing (CONTEXT.md or PLAN.md not found)
+- Tasks have PARTIAL/FAILED gaps
+- R4 architecture conflict detected
+
+**Output:** source files + `.works/[version]/[N]-SUMMARY.md` + commit
+
+---
+
+### `/ml-test [N]`
+
+Runs three automated validation passes and produces a GO/NO-GO/CONDITIONAL decision.
+
+```bash
+/ml-test 1
+```
+
+**What it does:**
+
+Spawns **ml-evaluator** agent which runs:
+
+1. **Coding convention checks** — ruff/flake8, black, mypy (SKIP if not installed), import hygiene, hardcoded paths (WARNING), hardcoded credentials (**BLOCKER**)
+2. **Requirements traceability** — every REQ-ID in REQUIREMENTS.md traced to a plan task and its completion status
+3. **Success criteria evaluation** — runs eval scripts, checks artifact existence, runs behavioral tests — records actual vs target
+
+**Decision logic:**
+- `GO` — all criteria pass, no blockers
+- `NO-GO` — any criterion fails, OR blocker found
+- `CONDITIONAL` — all criteria pass, non-critical issues noted
+- `BLOCKER` — hardcoded credentials found (stops everything)
+
+**Auto-chain:**
+- GO / CONDITIONAL → auto-proceeds to `/ml-doc [N]`
+- NO-GO → pauses, asks how to handle failed criteria
+- BLOCKER → pauses, requires fix before proceeding
+
+**Output:** `.works/[version]/[N]-EVALUATION.md`
+
+---
+
+### `/ml-doc [N]`
+
+Generates user-centric, XWiki-sync-compatible documentation.
+
+```bash
+/ml-doc 1          # Document phase 1
+/ml-doc --release  # Full version index + CHANGELOG entry
+/ml-doc --all      # Regenerate all completed phases
+```
+
+**What it does:**
+
+Spawns **ml-documenter** agent which writes documentation following these rules:
+- Writes for a user who will **use** the output, not someone who built it
+- Zero planning jargon (no: wave, plan, executor, CONTEXT.md, SUMMARY.md)
+- Every code block is copy-pasteable with realistic expected output
+- XWiki-compatible: H1-H3 only, fenced code blocks with language tags, no HTML, standard pipe tables
+
+**Documentation template:**
+```markdown
+# [Phase Name]
+> Version | Status | Key result
+
+## What This Does
+## Before You Start
+## Step-by-Step
+## Key Configuration
+## Results
+## Troubleshooting
+## What Comes Next
+```
+
+**Commits:** `docs([version]): [phase-name] documentation`
+
+**Auto-proceeds to `/ml-report session`** after commit.
+
+**Output:** `docs/[version]/[NN]-[phase-slug].md`
+
+---
+
+### `/ml-report`
+
+Consolidates results and synthesizes 2–3 concrete next-step recommendations.
+
+```bash
+/ml-report            # Session report (today's activity)
+/ml-report experiment # Compare all runs across phases
+/ml-report version    # Full version retrospective + model card
+```
+
+**Session report includes:** What was accomplished (with commit refs), experiments run, key decisions locked, what was NOT completed, blockers, recommended next session commands.
+
+**Experiment report includes:** Summary table (arch/dataset/metric), best run analysis, patterns found, recommended next experiment.
+
+**Version report includes:** Original goal vs achieved, phase journey, final model spec, metrics, top-5 key decisions, what worked/didn't, model card, recommendations for next version.
+
+**This is the only command that always asks** — it's the natural end of the pipeline where you decide what's next.
+
+**Output:** `.works/reports/[type]-[date].md`
+
+---
+
+## Directory Structure
+
+### Framework (installed to `.github/`)
 
 ```
-/my-new-version          → Initialize version: .note/vX.Y/ + ROADMAP.md  [COMMIT]
-/my-discuss <phase>      → Gather context + lock decisions → KNOWLEDGE.md + CONTEXT.md  [COMMIT]
-/my-plan <phase>         → Create detailed phase plan → PLAN.md files
-/my-implement <phase>    → Execute plan → code + per-task commits  [COMMITS]
-/my-evaluate <phase>     → Evaluate metrics vs targets → EVALUATION.md
-/my-doc [--phase N|--release] → Generate user-centric docs for XWiki sync
-/my-debug [issue]        → Systematic debugging with persistent state
-/my-status               → Current project status and next action
-/my-continue             → Resume from last checkpoint
-/my-release-version <v>  → Clean up intermediates, finalize docs, tag release  [COMMIT]
+.github/
+├── copilot-instructions.md     ← loaded by Claude as custom instructions
+│                                  includes command→file resolution table
+├── agents/
+│   ├── ml-researcher.agent.md      ← Deep Research Agent (5-step, cited report)
+│   ├── ml-rubber-duck.agent.md     ← validate plans before execution
+│   ├── ml-executor.agent.md        ← execute implementation waves
+│   ├── ml-evaluator.agent.md       ← run convention + criteria checks
+│   ├── ml-documenter.agent.md      ← write user-centric docs
+│   ├── ml-codebase-mapper.agent.md ← AST-parse + tag ML pipeline
+│   └── ml-context-keeper.agent.md  ← compress context, maintain STATE.md
+├── skills/
+│   └── ml-ask.md               ← beautiful user-centric question patterns
+└── ml/
+    ├── workflows/
+    │   ├── ml-discuss.md
+    │   ├── ml-planning.md
+    │   ├── ml-implement.md
+    │   ├── ml-test.md
+    │   ├── ml-doc.md
+    │   ├── ml-report.md
+    │   └── ml-map-codebase.md
+    ├── templates/
+    └── VERSION
+```
+
+### Project state (created by the framework in your project)
+
+```
+.works/
+└── [version]/                  ← e.g., v1.0, sprint-3, experiment-rag
+    ├── STATE.md                ← current phase, progress, next action
+    ├── KNOWLEDGE.md            ← accumulated research findings
+    ├── [N]-CONTEXT.md          ← locked requirements per phase
+    ├── [N]-PLAN.md             ← wave/task breakdown per phase
+    ├── [N]-SUMMARY.md          ← implementation results per phase
+    ├── [N]-EVALUATION.md       ← test results + GO/NO-GO per phase
+    ├── SESSION-[date].md       ← session resume checkpoints
+    └── codebase/
+        ├── MANIFEST.md
+        ├── COMPONENTS.md
+        ├── DEPENDENCIES.md
+        ├── RETRIEVAL-INDEX.md
+        └── chunks/
+            └── [module].[fn].md
+
+docs/
+└── [version]/
+    ├── index.md                ← version overview + quick start
+    ├── [NN]-[phase-slug].md   ← one doc per phase
+    └── CHANGELOG.md
+
+.works/
+└── reports/
+    ├── session-[date].md
+    ├── experiments-[date].md
+    └── version-[version]-[date].md
 ```
 
 ---
 
-## Full Workflow Visualization
+## Sub-Agents
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     MY ML/AI FRAMEWORK — FULL WORKFLOW                      │
-└─────────────────────────────────────────────────────────────────────────────┘
+Each agent is spawned by its parent workflow with a `<files_to_read>` block — it receives only the files it needs, keeping the main context lean.
 
-  /my-new-version
-  ├─ AskUserQuestion: project type, dataset, target metrics, compute
-  ├─ Spawn: my-roadmapper
-  ├─ Creates: PROJECT.md, ROADMAP.md, STATE.md
-  └─ ✅ COMMIT #1 ── "docs: initialize [project] ([N] phases)"
+| Agent | Spawned by | What it does |
+|-------|-----------|-------------|
+| `ml-researcher` | `ml-discuss` Step 5, `ml-plan` Step 5 | Deep Research Agent: breaks question into 3–5 sub-tasks, searches 5+ credible sources (Tier 1/2/3), analyzes for bias, synthesizes cited report to KNOWLEDGE.md |
+| `ml-rubber-duck` | `ml-plan` Step 7 | Validates plan clarity, dependencies, failure modes — read-only |
+| `ml-executor` | `ml-implement` per wave | Executes tasks, applies R1-R4 deviation rules, returns wave report |
+| `ml-evaluator` | `ml-test` | Runs all checks, writes EVALUATION.md, returns GO/NO-GO decision |
+| `ml-documenter` | `ml-doc` | Writes user-centric XWiki-ready docs |
+| `ml-codebase-mapper` | `ml-map-codebase` | AST-parses source, tags pipeline stages, writes chunks/ |
+| `ml-context-keeper` | Any workflow at ~70% context | Compresses STATE.md, writes session checkpoint |
 
-  ╔═══════════════════════════════════════════════╗
-  ║         PHASE LOOP  (repeat for each phase)   ║
-  ╚═══════════════════════════════════════════════╝
+---
 
-  /my-discuss N ──────────────────────────────── DISCUSS & LOCK
-  │
-  │  ── Step 0: Context Gathering ──────────────────────────────
-  │  │
-  │  │  AskUserQuestion: "Any papers, code refs, or ideas to add?"
-  │  │  ├─ Yes → collect papers / code refs / ideas (via AskUserQuestion)
-  │  │  │        → create or update KNOWLEDGE.md
-  │  │  └─ Skip → KNOWLEDGE.md already up to date
-  │  │
-  │  ── Step 1: Identify Decision Areas (by phase type) ─────────
-  │  │
-  │  │  Data Pipeline:  format · augmentation · DataLoader · splits
-  │  │  Architecture:   backbone · pretrained weights · head · resolution
-  │  │  Training:       optimizer · scheduler · batch · precision · LoRA
-  │  │  Evaluation:     benchmarks · scripts · analysis depth
-  │  │
-  │  ── Step 2: Batch Decisions (DEFAULT: all areas at once) ────
-  │  │
-  │  │  Single AskUserQuestion for all areas together
-  │  │  Each area: options + trade-offs + recommendation
-  │  │  --step flag → sequential mode (one area at a time)
-  │  │  --auto flag → pick all recommended defaults, skip asking
-  │  │
-  │  ── Step 3: Lock ─────────────────────────────────────────────
-  │  │
-  │  │  Creates: N-CONTEXT.md    (locked decisions for planner/executor)
-  │  │  Creates: N-DISCUSSION-LOG.md  (audit trail)
-  │  │
-  └──└─ ✅ COMMIT #2 ── "docs: phase N context locked - [name]"
+## Context Management
 
-  /my-plan N ──────────────────────────────────── PLANNING
-  │
-  │  ── Step 1: Optional Research ───────────────────────────────
-  │  │
-  │  │  Auto-skip when: KNOWLEDGE.md has ≥2 relevant papers
-  │  │                  AND CONTEXT.md is clear and complete
-  │  │  Otherwise → AskUserQuestion:
-  │  │  ├─ Quick (~10 min): scan key papers for this phase type
-  │  │  ├─ Deep  (~30 min): full survey, approach comparison, gap analysis
-  │  │  └─ Skip:  go straight to planning
-  │  │
-  │  ── Step 2: Plan — spawn my-planner ─────────────────────────
-  │  │
-  │  │  Decomposes phase into 2–4 PLAN.md files
-  │  │  Each plan: 2–3 tasks with  files + action + verify + done
-  │  │  Waves assigned by dependency graph
-  │  │
-  │  ── Step 3: Verify — my-plan-checker (1 pass only) ──────────
-  │  │
-  │  │  Issues found → my-planner gets ONE revision → proceed
-  │  │
-  │  ── Step 4: Adjust ───────────────────────────────────────────
-  │  │
-  │  │  AskUserQuestion: "Anything to adjust before finalizing?"
-  │  │
-  └──└─ ✗ No commit  (plans are intermediate artifacts)
+Long ML sessions accumulate context. The framework handles this automatically:
 
-  /my-implement N ─────────────────────────────── EXECUTION
-  │
-  │  Discover: list PLAN.md files, build dependency graph, assign waves
-  │
-  │  Wave 1 ─────────────────── parallel spawn ─────────────────
-  │  ├─ Executor A  (plan 01)  tasks → per-task commit
-  │  ├─ Executor B  (plan 02)  tasks → per-task commit
-  │  └─ Executor C  (plan 03)  tasks → per-task commit
-  │          Each task commit: feat/fix/train/data/model(N-P): desc
-  │
-  │  Wave 2 ─────────────────── parallel spawn ─────────────────
-  │  ├─ Executor D  (plan 04, depends on plan 01)
-  │  └─ Executor E  (plan 05, depends on plan 02)
-  │  (only starts after all Wave 1 executors complete)
-  │
-  │  Each plan completion → metadata commit:
-  │      docs(N-NN): complete [plan-name] plan
-  │
-  │  Deviation rules (auto-applied during execution):
-  │  Rule 1: Auto-fix bugs (broken behavior, errors, incorrect output)
-  │  Rule 2: Auto-add missing critical (error handling, auth, CSRF/CORS)
-  │  Rule 3: Auto-fix blockers (missing deps, wrong types, broken imports)
-  │  Rule 4: STOP → AskUserQuestion  (architectural changes → user decides)
-  │
-  └─ ✅ COMMITS ── per-task + per-plan metadata (many atomic commits)
+**`<files_to_read>` protocol:** Agents receive file paths, not pasted content. This keeps spawned agents lean.
 
-  /my-evaluate N ──────────────────────────────── EVALUATION
-  │
-  │  Spawn: my-evaluator
-  │  Checks: metrics vs CONTEXT.md targets
-  │  Creates: EVALUATION.md  (metrics table, examples, go/no-go)
-  │  ✗ No commit
-  │
-  ├─ ✅ GO     → /my-discuss N+1   (next phase)
-  └─ ❌ NO-GO  → /my-implement N --gaps-only
-                  (creates gap-closure PLAN.md files, re-executes)
-                or /my-debug [issue]  (scientific investigation)
+**Codebase chunks:** `ml-executor` loads `chunks/[module].[fn].md` (< 80 lines, pre-parsed) instead of full source files.
 
-  └──────── repeat until all phases complete ───────────────────
+**STATE.md:** Single source of truth for "where are we now." The `ml-context-keeper` agent compresses this file at phase boundaries and when context approaches ~70%.
 
-  /my-release-version vX.X.X
-  ├─ Creates: VERSION-SUMMARY.md + git tag
-  └─ ✅ COMMIT ── "chore: release vX.X.X"
-```
+**Session resume:** `SESSION-[date].md` in `.works/[version]/` tells you exactly which files to load and which command to run next.
 
 ---
 
 ## Commit Discipline
 
-Only **3 defined commit points** per project lifecycle:
+Only two commit points in the entire pipeline:
 
-| Point | When | Message format |
-|-------|------|----------------|
-| **#1 Version init** | After `/my-new-version` | `docs: initialize [project] ([N] phases)` |
-| **#2 Context locked** | After `/my-discuss N` | `docs: phase N context locked - [name]` |
-| **#3 Implementation** | After each task in `/my-implement N` | `feat/train/data(N-P): [task name]` + plan metadata |
+| Point | Command | Message format |
+|-------|---------|---------------|
+| Phase implement complete | `/ml-implement` after all waves | `feat(phase-N): implement [phase-name]` |
+| Phase docs complete | `/ml-doc` after writing | `docs([version]): [phase-name] documentation` |
 
-No commits during: plan, evaluate, research, debug, status, or continue sessions.
-
----
-
-## Interaction Design
-
-All user interactions happen through **AskUserQuestion** — a structured dialog that presents options with explanations. This applies even when the user wants to explain freely:
-
-```
-Standard interaction:
-  header: "Backbone"
-  question: "Which backbone for Phase 2?"
-  options: ["ViT-B/16 (balanced)", "ViT-L/14 (best quality)", "ConvNeXt-B (efficient)"]
-
-When user wants to explain freely:
-  header: "Tell me more"
-  question: "Go ahead — what are you thinking?"
-  options: ["That's all"]   ← user types freely via Other field
-```
-
-No plain-text prompts. Consistent structured interaction throughout.
+No commits during: discuss, plan, test, report, research, debug, or status.
 
 ---
 
-## Model Profiles
+## Example Session
 
-Agents are assigned models based on the active profile. Some agents are **pinned to Claude Opus 4.7** regardless of profile because their work quality has the highest downstream impact.
+```bash
+# 1. Map the existing codebase (run once, update after refactors)
+/ml-map-codebase
 
-| Agent | `quality` | `balanced` | `budget` | Role |
-|-------|-----------|------------|----------|------|
-| `my-planner` | opus | opus | sonnet | Architecture decisions |
-| **`my-executor`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Real-time deviation decisions |
-| **`my-debugger`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Hypothesis-driven investigation |
-| **`my-quantizer`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Accuracy/latency tradeoffs |
-| **`ai-phase-researcher`** | **opus-4-7** | **opus-4-7** | **opus-4-7** | Literature synthesis |
-| `my-plan-checker` | sonnet | sonnet | haiku | Plan validation |
-| `my-codebase-mapper` | sonnet | haiku | haiku | Exploration |
+# 2. Discuss Phase 2: small object detection improvement
+/ml-discuss 2
+# → asks 5 questions about the painpoint
+# → optionally runs Deep Research Agent on multi-scale fusion approaches
+#   → searches 5+ arXiv papers + HuggingFace model cards (Tier 1 sources)
+#   → returns: Confirmed / Challenged / New constraint findings
+# → recommends LoRA + FPN head modification
+# → locks requirements to .works/v1.1/2-CONTEXT.md
 
-> **Pinned agents** use `claude-opus-4-7` across all profiles (fallback: `claude-opus-4-6`).
-> Set profile in `.note/config.json`: `{ "model_profile": "balanced" }`
+# 3. Plan the implementation
+/ml-plan 2
+# → reads 2-CONTEXT.md (skips re-asking context)
+# → asks: research before building the plan? (Skip / Quick / Deep)
+# → builds 3-wave plan: setup → FPN integration → validation
+# → rubber-duck validates task clarity
+# → you adjust Wave 3 task, plan saved
 
----
+# 4–6. Execute the pipeline (largely automatic — autopilot mode)
+/ml-implement 2
+# ╔══════════════════════════════════════════╗
+# ║  AUTOPILOT ENGAGED — /ml-implement 2    ║
+# ╚══════════════════════════════════════════╝
+# → executes waves via ml-executor agents
+# → commits: feat(phase-2): small object detection
+# → auto-proceeds to test...
+# → ml-evaluator runs: ruff PASS, mAP@0.5 = 0.47 (target 0.45) → GO
+# → auto-proceeds to docs...
+# → ml-documenter writes docs/v1.1/02-small-object-detection.md
+# → commits: docs(v1.1): small object detection
+# → auto-proceeds to report...
 
-## All 14 Commands
-
-### Version Management
-
-| Command | Description |
-|---------|-------------|
-| `/my-new-version` | Start a new version. Creates `.note/{version}/` with PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md. Sets `current_version` in config. |
-| `/my-release-version <v>` | Verify phases, generate release docs, clean up intermediate artifacts (PLAN/SUMMARY), tag release. Context files kept for traceback. |
-
-### Phase Loop
-
-| Command | Description |
-|---------|-------------|
-| `/my-discuss <phase>` | Gather context (papers, code refs, ideas → KNOWLEDGE.md) then lock decisions → CONTEXT.md + DISCUSSION-LOG.md. Batch mode by default. Use `--step` for sequential, `--auto` for agent defaults. |
-| `/my-plan <phase>` | Generate PLAN.md files via `my-planner` agent. Auto-skips research when KNOWLEDGE.md is comprehensive. Verifies with `my-plan-checker` (1 pass). |
-| `/my-implement <phase>` | Execute PLAN.md wave-by-wave via parallel `my-executor` agents. Per-task commits + plan metadata commits. |
-| `/my-evaluate <phase> [--quick\|--full]` | Evaluate model vs CONTEXT.md targets → EVALUATION.md with go/no-go decision. |
-
-### Documentation
-
-| Command | Description |
-|---------|-------------|
-| `/my-doc --phase <N>` | Generate user-centric step-by-step docs for a completed phase. Run after `/my-evaluate N` with GO result. Output: `{docs_dir}/{version}/{N}-{phase-name}.md` |
-| `/my-doc --release` | Finalize version documentation: index page + CHANGELOG update. Run automatically at `/my-release-version`. |
-| `/my-doc --all` | Regenerate docs for all completed phases (useful after bulk changes). |
-
-### Debugging & Navigation
-
-| Command | Description |
-|---------|-------------|
-| `/my-debug [issue]` | Scientific debugging — evidence → hypothesis → test. Persists across `/clear`. Resume with no args. |
-| `/my-status` | Show current phase, latest metrics, open issues, recommended next command. |
-| `/my-continue` | Resume from last checkpoint using STATE.md. |
-
-### Research & Exploration
-
-| Command | Description |
-|---------|-------------|
-| `/my-research [--quick\|--deep] <topic>` | Gray-area / frontier ML research. `--quick`: 3-5 papers + recommendation. `--deep`: full literature survey, gap analysis, synthesis. Output: `.note/research/{slug}-RESEARCH.md` |
-| `/my-map-codebase [path]` | Map an existing codebase into 7 structured docs: STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS. |
-
-### Data Engineering
-
-| Command | Description |
-|---------|-------------|
-| `/my-data-prep <task> [--convert\|--split\|--pack\|--validate\|--push]` | Build CV/VLM data pipelines. Format conversion (COCO↔VOC↔YOLO↔HF), splits with stratification, WebDataset/LMDB packing, integrity validation, HuggingFace Hub push. |
-
-### Model Optimization
-
-| Command | Description |
-|---------|-------------|
-| `/my-quantize <phase> [--fp16\|--int8\|--onnx\|--trt\|--all]` | Full quantization pipeline: FP16, INT8 calibration, ONNX export, TensorRT engine. Benchmarks accuracy-latency tradeoff. Output: `QUANTIZATION-REPORT.md`. |
-
-### Reporting
-
-| Command | Description |
-|---------|-------------|
-| `/my-report [session\|experiment\|version]` | `session`: today's work summary. `experiment`: metrics comparison table across runs. `version`: full recap with model card. |
-
----
-
-## Agents
-
-| Agent | Role | Model |
-|-------|------|-------|
-| `my-planner` | Creates PLAN.md with ML-aware task decomposition | opus |
-| `my-executor` | Implements Python/PyTorch/ML code | **opus-4-7** |
-| `my-roadmapper` | Creates phase roadmap from ML requirements | sonnet |
-| `my-researcher` | Researches CV/VLM papers, architectures, SOTA | **opus-4-7** |
-| `my-research-synthesizer` | Synthesizes research into actionable insights | sonnet |
-| `my-evaluator` | Evaluates model: metrics, benchmarks, go/no-go | sonnet |
-| `my-data-analyst` | Analyzes CV datasets (COCO, ImageNet, VQA, etc.) | sonnet |
-| `my-data-engineer` | Builds data pipelines, format conversions, packing | sonnet |
-| `my-debugger` | Debugs training/CUDA/data pipeline issues | **opus-4-7** |
-| `my-plan-checker` | Verifies plan quality before execution | sonnet |
-| `my-codebase-mapper` | Maps existing codebase/code references | haiku |
-| `my-quantizer` | Quantizes models (FP16/INT8/ONNX/TensorRT/CoreML) | **opus-4-7** |
-
----
-
-## `.note/` Structure
-
-Each version gets its own subdirectory. All planning artifacts are version-scoped for full traceability.
-
-```
-.note/
-├── config.json             # Shared config: current_version, docs_dir, model profile, etc.
-│
-├── v1.0/                   # Previous version — context preserved for traceback
-│   ├── PROJECT.md          # What was built and why
-│   ├── REQUIREMENTS.md     # Requirement IDs and traceability
-│   ├── ROADMAP.md          # Phase breakdown
-│   ├── KNOWLEDGE.md        # Papers, references, key insights
-│   ├── VERSION-SUMMARY.md  # Release summary
-│   └── phases/
-│       └── 01-{name}/
-│           ├── 01-CONTEXT.md          # Locked decisions (kept forever)
-│           ├── 01-DISCUSSION-LOG.md   # Audit trail (kept forever)
-│           └── EVALUATION.md          # Metrics achieved (kept forever)
-│
-└── v1.1/                   # Current active version
-    ├── PROJECT.md
-    ├── REQUIREMENTS.md
-    ├── ROADMAP.md
-    ├── STATE.md             # Current phase, best metric, blockers
-    ├── KNOWLEDGE.md
-    └── phases/
-        └── 01-{name}/
-            ├── 01-CONTEXT.md
-            ├── 01-DISCUSSION-LOG.md
-            ├── 01-01-PLAN.md          # Removed at release (intermediate)
-            ├── 01-01-SUMMARY.md       # Removed at release (intermediate)
-            └── EVALUATION.md
-```
-
-**After release:** PLAN.md and SUMMARY.md are cleaned up. All context files (CONTEXT.md, DISCUSSION-LOG.md, EVALUATION.md, KNOWLEDGE.md, REQUIREMENTS.md) are kept permanently for traceback.
-
-## `docs/` Structure
-
-Generated by `/my-doc`, stored in configurable `docs_dir` (default: `docs/`):
-
-```
-docs/
-├── CHANGELOG.md            # Cross-version changes
-├── v1.0/
-│   ├── index.md            # Version overview + quick start
-│   ├── 01-data-pipeline.md # Step-by-step phase guide
-│   ├── 02-model.md
-│   └── ...
-└── v1.1/
-    ├── index.md
-    └── 01-detection.md     # Added incrementally after each phase GO
-```
-
-Each doc is clean Markdown formatted for XWiki sync. Copy `docs/{version}/` to your XWiki space.
-
----
-
-## Commit Conventions
-
-```
-feat(phase-N): description     — new feature
-fix(phase-N): description      — bug fix
-train(phase-N): description    — training code
-data(phase-N): description     — dataset/pipeline
-model(phase-N): description    — architecture
-eval(phase-N): description     — evaluation code
-experiment(phase-N): desc      — experiment configs/results
-docs(phase-N): description     — plan completion metadata
-docs: description              — project-level planning docs
-chore: description             — release, tooling
+# 7. Report pauses, shows pipeline summary, asks what's next
+/ml-report
+# → session report: what was done, metrics, recommended Phase 3
 ```
 
 ---
 
-## Repository Structure
+## Supported ML Tasks
 
-```
-ai/                            ← deploy contents to .github/
-├── skills/my-*/SKILL.md       ← slash command entry points
-├── agents/my-*.agent.md       ← specialized ML agents
-├── my/
-│   ├── workflows/*.md         ← workflow logic (discuss, plan, implement, etc.)
-│   ├── references/*.md        ← ML knowledge base (model profiles, git, TDD, etc.)
-│   ├── templates/             ← artifact templates
-│   └── bin/my-tools.cjs       ← CLI for state, commits, config
-├── hooks/pre-tool-use.json    ← safety hooks
-└── scripts/                   ← Python utilities
-```
+Optimized for **Computer Vision** and **Vision-Language Models (VLMs)**, including:
+
+- Object detection (YOLO, DETR, RT-DETR)
+- Image classification (ViT, ConvNeXt, EfficientNet)
+- Vision-language models (LLaVA, InternVL, Qwen-VL, PaliGemma)
+- Fine-tuning (SFT, LoRA, QLoRA, DPO)
+- Quantization (GPTQ, AWQ, INT8, GGUF)
+- RAG pipelines
+- Custom evaluation harnesses
+
+The framework also works for general ML (tabular, NLP, time series) but the phase templates and agent knowledge are CV/VLM-optimized.
+
+---
+
+## Version
+
+Current framework version: `1.1.0`
